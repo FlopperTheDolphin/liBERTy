@@ -25,7 +25,7 @@ def tokens(sent_id):
  sent_path = os.path.join(sent_dir, sent_id) + ".xml"
  print(comp_token(tokenizer,sent_path))
 
-def see(sent_id,layer,head,token):
+def see_token(sent_id,layer,head,token):
  
   fram = select_sub_matrix_for_token(out_dir,sent_id,layer,head,token)
   tokenizer =  load_tokenizer(model_dir)
@@ -70,7 +70,7 @@ def main():
            print("> ERROR: require id sentence")
           
      
-    elif main_option == "see_token":
+    elif main_option == "see":
          for current_arg in arguments:
         
           if current_arg[0] in ("-s","--sentence"):

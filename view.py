@@ -8,12 +8,12 @@ def view_token(fram,tokens,token):
  
  network = pd.DataFrame(data=fram,index=tokens,columns=[token])
  
- res = network.sort_values(by='TO', ascending=False)
+ res = network.sort_values(by=token, ascending=False)
  
  res=res.iloc[:20,:]
  
  #print(network)
- print("---------------20 Parole con più alto valore associato a "+ token "-----------")
+ print("---------------20 Parole con più alto valore associato a "+ token +"-----------")
  print(res)
  
  
