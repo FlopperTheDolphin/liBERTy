@@ -19,18 +19,28 @@ def comp_matrix(tokenizer,model,sent_path):
   
  return attentions,tokens,id_sent
  
-  
-def save_matrix(dir_path,tokens,id_sent,attentions,verbose = True):
+def save_matrix(dir_path,tokens,attentions,verbose = True):
  # dimension (12,1,12,n,n)
  print('> ' + MTX_SAVE)
  for i in range(12):
   for j in range(12):
    np_attention = attentions[i][0][j].detach().numpy()
    df = pd.DataFrame(data=np_attention,columns=tokens)
-   file_name = dir_path+"/"+ id_sent+ "_layer-"+str(i+1)+"_head-"+str(j+1)+".csv"
+   file_name = dir_path+"/"+ "att-mtx_layer-"+str(i+1)+"_head-"+str(j+1)+".csv"
    df.to_csv(file_name, index=False)
    if(verbose) :
     print('> [' + file_name + '] Saved')
  print('> '+ MTX_SAVE_COMP)   
 
+
+def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
+ mtx = load_matrix(out_dir,id_sent,layer,head)
+ fram = mtx[token]
+ 
+ return fram
+ 
+def comp_token(tokenizer,sent_path):
+ sentence,id_sent = load_sentence(sent_path)
+ e=tokenizer.encode(sentence, add_special_tokens=True)
+ return tokenizer.convert_ids_to_tokens(e)
 
