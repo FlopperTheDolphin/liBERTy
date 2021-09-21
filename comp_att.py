@@ -66,14 +66,18 @@ def tokens_to_sentence(l1,l2,dic = None):
  obj_v = l2.pop(0)
  v = str(obj_v)
  
+ 
  k=list()
  k.append(s)
  
  while(v != s and len(l1) != 0):
+  if(v=='mm'):
+   break 
   t = l1.pop(0)
   k.append(t)
   t= t.replace('##','') 
-  s = s+t 
+  s = s+t
+  
  
  for token in k:
   dic[token] = v 

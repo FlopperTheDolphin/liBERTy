@@ -46,6 +46,8 @@ def see_token(layer,head,word,sent,time=None):
   
   fram_dic = dict()
   
+ 
+  
   for tk in tokens:
    if dic_sent[tk] == word: 
     fram = select_sub_matrix_for_token(out_dir,sent_id,layer,head,tk)
@@ -106,7 +108,11 @@ def main():
  try:
     arguments, values = getopt.getopt(argument_list, options, long_options)
     if  main_option in ("h", "help","-h","--help"):
-        print ("Help")
+        print ("load - load matrix's sentence")
+        print("see_token [-l | --layer = <layer>] [-h | --head = <head>] [-w | --word = <word>] [-s | --sentence] [-t | --time = <time>] - show most weighted token given a word: sentence = change style of visualisation, time = select how many tokens correlated find")
+        print("pos [-l | --layer = <layer>] [-h | --head = <head>] - show the pos graph given a attention matrix")
+        print("tokens - print all sentence tokens")
+        print("sentence - print the sentence")
              
     elif main_option == "load":
           #if arguments[0][0] != None and arguments[0][0] in ("-s","--sentence"):
@@ -142,6 +148,9 @@ def main():
        tokens()
       #else:
       # print("> ERROR: require id sentence")
+    
+    elif main_option == "sentence":
+     print(sentence)
       
     elif main_option == "pos":
     

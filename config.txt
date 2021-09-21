@@ -3,9 +3,9 @@ model_dir = /home/fusco/bt/model_custom
 out_dir = /home/fusco/bt/cd/out
 sent_dir = /home/fusco/dt/rf/2019/training_5000
 
-sentence = TC TORACE-ADDOME Esame condotto prima e dopo somministrazione di mdc endovena (Xenetix 350, 120 ml), confrontato con precedente del 12/11/2018. TORACE: rimossi la cannula tracheale ed il drenaggio toracico destro. Non sinificative modificazioni della componente di entità non elevata di emotorace destro, moderato incremento della componente liquida di versamento associata. Persiste addensamento compressivo del parenchima adiacente. Lieve incremento del versamento pleurico sinistro, sempre di entità non elevata, ed associato a fenomeni di disventilazione compressiva del parenchima adiacente. Non sanguinamenti in atto. Nettamente ridotto lo scollamento pleurico destro, permane minimo in sede basale anteriore. Invariato il resto. ADDOME: non modificazioni significative degli ematomi in sede epatica ed al polo renale superiore destro. Non sanguinamenti in atto. Lieve incremento dell'entità del versamento liquido periepatico, lungo la doccia parietocolica destra, nello scavo pelvico ed in sede perisplenica (invariata la minima componente ematica in fase di organizzazione nel contesto del versamento pelvico). Non sovradistensione delle anse intestinali, che hanno pareti di normali spessore ed enhancement. Invariato il resto.
+sentence = TC TORACE CON MDC (Ultravist370, 90ml) Esame confrontato con precedente del 16/6/2017. Invariati gli esiti di lobectomia inferiore sin. Non segni di recidiva locale nè lesioni parenchimali riferibili a localizzazioni secondarie. Invariati il nodulo parenchimale di 4mm nella porzione caudale e posteriore del polmone sin residuo. Non adenopatie. Non versamento pleurico. Invariato il resto.
 
-sentence_id = frase1
+sentence_id = 201806130752-9992065
 
 
  

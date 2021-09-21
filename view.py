@@ -5,37 +5,63 @@ from vs_constants import *
 from colorama import Fore, Back, Style
 
 def view_sentence(fram_dic,tokens,word,spacy_token,time=None):
- 
+ print('------------------------------------------------') 
  keys = list(fram_dic.keys())
  
- w = list()
+ red = list()
+ yellow=list()
+ green=list()
  
  if time == None:
   t = 20
  else:
-  t = time 
+  t = int(time)
   
+    
  
  for token in keys :
-  f = fram_dic[token].tolist()
+  f = fram_dic[token].tolist()  
   network = pd.DataFrame(data=f,index=tokens,columns=[token])
   res = network.sort_values(by=token, ascending=False)
-  w=w+list(res.iloc[:int(t),:].index)
+  res_green = res.iloc[t+t+1:t+t+t,:]
+  res_yellow = res.iloc[t+1:t+t,:]
+  res_red = res.iloc[:t,:]
+  green=green+list(res_green.index)
+  yellow=yellow+list(res_yellow.index)
+  red=red+list(res_red.index)
   
   
  for token in tokens:
   if token in keys:
-   print(Fore.RED + token,end=' ')
-  elif token in w:
-   print(Fore.GREEN + token,end=' ')
-  else:
-   print(Style.RESET_ALL + token,end=' ')
   
- print('')    
+   color = ''
+   if token in green:
+     color = Fore.GREEN  
+   elif token in yellow :
+     color = Fore.YELLOW  
+   elif token in red:
+     color = Fore.RED     
+   
+   print(Style.RESET_ALL,end='')
+   print(Back.BLUE + color + token,end=' ')
+   print(Style.RESET_ALL,end='')
+      
+  elif token in green:
+     print(Fore.GREEN + token,end=' ')  
+  elif token in yellow :
+     print(Fore.YELLOW + token,end=' ')
+  elif token in red:
+     print(Fore.RED + token,end=' ')
+  else:
+    print(Style.RESET_ALL + token,end=' ')  
+  
+ print(Style.RESET_ALL)    
  
  print('---------------------------------------------------------------')
- print('* ROSSO = token analizzati')
- print('* VERDE = token con il più alto tasso di attention')
+ print('* '+Back.BLUE+'BLUE'+Style.RESET_ALL+ ' = token analizzati')
+ print('* '+Fore.RED+'ROSSO'+Style.RESET_ALL+' = token con il più alto tasso di attention')
+ print('* '+Fore.YELLOW+'GIALLO'+Style.RESET_ALL+' = token con un tasso medio di attention')
+ print('* '+Fore.GREEN+'VERDE'+Style.RESET_ALL+' = token con un tasso minore di attention')
  print('---------------------------------------------------------------')
  
  
@@ -50,7 +76,6 @@ def view_word(fram_dic,tokens,word,time=None):
   t = time 
   
  
-
  for token in list(fram_dic.keys()):
   f = fram_dic[token].tolist()
   network = pd.DataFrame(data=f,index=tokens,columns=[token])
