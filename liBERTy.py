@@ -2,10 +2,12 @@ import sys
 import os
 import getopt
 import gc
+import spacy
 from configparser import ConfigParser
 from comp_att import *
 from loader import *
 from view import *
+
 
 # save matrix in a file
 def load(sent_id): 
@@ -36,7 +38,31 @@ def see_token(sent_id,layer,head,token):
   
   view_token(fram,tokens,token)
   
+def see_pos(sent_id,layer,head):
   
+  sent_path = os.path.join(sent_dir, sent_id)
+  sentence,id_sent = load_sentence(sent_path)
+  
+  nlp = spacy.load("it_core_news_sm")
+  doc = nlp(sentence)
+  
+  spacy_token=list()
+  for token in doc:
+   spacy_token.append(token)
+
+  tokenizer = load_tokenizer(model_dir)
+  sent_path = os.path.join(sent_dir, sent_id) + ".xml"
+  bert_token = comp_token(tokenizer,sent_path)
+  
+  bt = list() + bert_token
+  
+  dic_tokens = labelizer(bt,spacy_token)
+  
+  att_mtx = load_matrix(out_dir,sent_id,layer,head)
+  
+  dic_pos,dic_edge = get_pos_mtx(att_mtx,dic_tokens,bert_token)
+  
+  view_mtx_pos(dic_edge,dic_pos)  
 
 def main():
 	
@@ -91,8 +117,22 @@ def main():
        tokens(arguments[0][1])
       else:
        print("> ERROR: require id sentence")
-     
+      
+    elif main_option == "pos":
     
+        for current_arg in arguments:
+ 
+          if current_arg[0] in ("-s","--sentence"):
+           sent_id = current_arg[1]
+          elif current_arg[0] in ("-l","--layer"):
+           layer= current_arg[1]
+          elif current_arg[0] in ("-h","--head"):
+           head = current_arg[1]
+          else:
+           print("> option not recognized")  
+        
+        see_pos(sent_id,layer,head)
+                
     else:
        print("> no command here")        
  except getopt.error as err:
