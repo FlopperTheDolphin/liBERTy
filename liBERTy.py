@@ -10,11 +10,11 @@ from view import *
 
 
 # save matrix in a file
-def load(sent_id): 
+def load(): 
   
  tokenizer,model = load_model(model_dir,model_dir)
- sent_path = os.path.join(sent_dir, sent_id)
- attentions,tokens,id_sent = comp_matrix(tokenizer,model,sent_path)
+ #sent_path = os.path.join(sent_dir, sent_id)
+ attentions,tokens = comp_matrix(tokenizer,model,sentence)
  path = os.path.join(out_dir, sent_id)
  
  if(not os.path.isdir(path)): 
@@ -22,26 +22,44 @@ def load(sent_id):
  save_matrix(path,tokens,attentions)
 
 
-def tokens(sent_id):
+def tokens():
  tokenizer =  load_tokenizer(model_dir)
- sent_path = os.path.join(sent_dir, sent_id) + ".xml"
- print(comp_token(tokenizer,sent_path))
+ #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
+ print(comp_token(tokenizer,sentence))
 
-def see_token(sent_id,layer,head,token):
+def see_token(layer,head,word,sent,time=None):
  
-  fram = select_sub_matrix_for_token(out_dir,sent_id,layer,head,token)
   tokenizer =  load_tokenizer(model_dir)
-  sent_path = os.path.join(sent_dir, sent_id) + ".xml"
-  tokens = comp_token(tokenizer,sent_path)
-    
-  #tokens is used to associate number of row to token
+  #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
+  tokens = comp_token(tokenizer,sentence)
   
-  view_token(fram,tokens,token)
+  nlp = spacy.load("it_core_news_sm")
+  doc = nlp(sentence)
+  spacy_token=list()
+  for token in doc:
+   spacy_token.append(token)
+   
+  sp = list()+spacy_token 
+  bt = list()+tokens 
   
-def see_pos(sent_id,layer,head):
+  dic_sent = tokens_to_sentence(bt,sp)
   
-  sent_path = os.path.join(sent_dir, sent_id)
-  sentence,id_sent = load_sentence(sent_path)
+  fram_dic = dict()
+  
+  for tk in tokens:
+   if dic_sent[tk] == word: 
+    fram = select_sub_matrix_for_token(out_dir,sent_id,layer,head,tk)
+    fram_dic[tk] = fram
+  
+  if sent == False:
+   view_word(fram_dic,tokens,word,time)
+  else:
+   view_sentence(fram_dic,tokens,word,spacy_token,time) 
+  
+def see_pos(layer,head):
+  
+  #sent_path = os.path.join(sent_dir, sent_id)
+  #sentence,id_sent = load_sentence(sent_path)
   
   nlp = spacy.load("it_core_news_sm")
   doc = nlp(sentence)
@@ -51,8 +69,8 @@ def see_pos(sent_id,layer,head):
    spacy_token.append(token)
 
   tokenizer = load_tokenizer(model_dir)
-  sent_path = os.path.join(sent_dir, sent_id) + ".xml"
-  bert_token = comp_token(tokenizer,sent_path)
+  #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
+  bert_token = comp_token(tokenizer,sentence)
   
   bt = list() + bert_token
   
@@ -71,18 +89,19 @@ def main():
  parser = ConfigParser()
  parser.read("config.txt")
  
- global model_dir, out_dir, sent_dir  
+ global model_dir, out_dir, sent_dir, sentence,sent_id  
  model_dir = parser.get("config", "model_dir") 
  out_dir = parser.get("config", "out_dir")
  sent_dir = parser.get("config", "sent_dir")
+ sentence = parser.get("config","sentence") 
+ sent_id = parser.get("config","sentence_id")
  
-
  main_option = sys.argv[1]
 
 
  argument_list = sys.argv[2:]
- options = "s:l:h:t:"
- long_options = ["sentence","layer","head","token"]
+ options = "l:h:w:st:"
+ long_options = ["layer","head","word","sentence","time"]
  
  try:
     arguments, values = getopt.getopt(argument_list, options, long_options)
@@ -90,48 +109,54 @@ def main():
         print ("Help")
              
     elif main_option == "load":
-          if arguments[0][0] != None and arguments[0][0] in ("-s","--sentence"):
-           load(arguments[0][1])
-          else:
-           print("> ERROR: require id sentence")
+          #if arguments[0][0] != None and arguments[0][0] in ("-s","--sentence"):
+          load()
+          #else:
+           #print("> ERROR: require id sentence")
           
      
-    elif main_option == "see":
+    elif main_option == "see_token":
+    
+         sent = False
+         time=None
          for current_arg in arguments:
         
-          if current_arg[0] in ("-s","--sentence"):
-           sent_id = current_arg[1]
-          elif current_arg[0] in ("-l","--layer"):
+          if current_arg[0] in ("-l","--layer"):
            layer= current_arg[1]
           elif current_arg[0] in ("-h","--head"):
            head = current_arg[1]
-          elif current_arg[0] in ("-t","--token"):
-           token = current_arg[1]
+          elif current_arg[0] in ("-w","--word"):
+           word = current_arg[1]
+          elif current_arg[0] in ("-s","--sentence"):
+           sent = True 
+          elif current_arg[0] in ("-t","--time"):
+           time = current_arg[1] 
           else:
            print("> option not recognized")  
           
-         see_token(sent_id,layer,head,token)
+                   
+         see_token(layer,head,word,sent,time)
     
     elif main_option == "tokens":
-      if arguments[0][0] != None and arguments[0][0] in ("-s","--sentence"):
-       tokens(arguments[0][1])
-      else:
-       print("> ERROR: require id sentence")
+      #if arguments[0][0] != None and arguments[0][0] in ("-s","--sentence"):
+       tokens()
+      #else:
+      # print("> ERROR: require id sentence")
       
     elif main_option == "pos":
     
         for current_arg in arguments:
  
-          if current_arg[0] in ("-s","--sentence"):
-           sent_id = current_arg[1]
-          elif current_arg[0] in ("-l","--layer"):
+          #if current_arg[0] in ("-s","--sentence"):
+           #sent_id = current_arg[1]
+          if current_arg[0] in ("-l","--layer"):
            layer= current_arg[1]
           elif current_arg[0] in ("-h","--head"):
            head = current_arg[1]
           else:
            print("> option not recognized")  
         
-        see_pos(sent_id,layer,head)
+        see_pos(layer,head)
                 
     else:
        print("> no command here")        

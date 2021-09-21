@@ -6,9 +6,9 @@ import pandas as pd
 from vs_constants import *
 from loader import *
 
-def comp_matrix(tokenizer,model,sent_path):
+def comp_matrix(tokenizer,model,sentence):
  print('> '+ MTX_CAL)
- sentence,id_sent = load_sentence(sent_path)
+# sentence,id_sent = load_sentence(sent_path)
  e=tokenizer.encode(sentence, add_special_tokens=True)
  output=model(torch.tensor([e]))
  #Matrix to load
@@ -17,7 +17,7 @@ def comp_matrix(tokenizer,model,sent_path):
  tokens = tokenizer.convert_ids_to_tokens(e)
  print('> '+ MTX_COMP)
   
- return attentions,tokens,id_sent
+ return attentions,tokens
  
 def save_matrix(dir_path,tokens,attentions,verbose = True):
  # dimension (12,1,12,n,n)
@@ -39,10 +39,48 @@ def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
  
  return fram
  
-def comp_token(tokenizer,sent_path):
- sentence,id_sent = load_sentence(sent_path)
+def comp_token(tokenizer,sentence):
  e=tokenizer.encode(sentence, add_special_tokens=True)
  return tokenizer.convert_ids_to_tokens(e)
+
+def tokens_to_sentence(l1,l2,dic = None):
+ if dic == None:
+  dic = dict()
+  
+ if len(l2)==0 or len(l1)==0:
+  dic['[SEP]']='[SEP]'
+  return dic
+ 
+ s = l1.pop(0)
+ 
+ if(s == '[CLS]'):
+  dic[s] = '[CLS]' 
+  tokens_to_sentence(l1,l2,dic)
+  return dic
+  
+ if(s == '[SEP]'):
+  dic[s] = '[SEP]'
+  tokens_to_sentence(l1,l2,dic)
+  return dic 
+   
+ obj_v = l2.pop(0)
+ v = str(obj_v)
+ 
+ k=list()
+ k.append(s)
+ 
+ while(v != s and len(l1) != 0):
+  t = l1.pop(0)
+  k.append(t)
+  t= t.replace('##','') 
+  s = s+t 
+ 
+ for token in k:
+  dic[token] = v 
+   
+ tokens_to_sentence(l1,l2,dic)
+ return dic   
+
  
 def labelizer(l1,l2,dic=None):
  if dic == None:
