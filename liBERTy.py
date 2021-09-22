@@ -27,7 +27,7 @@ def tokens():
  #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
  print(comp_token(tokenizer,sentence))
 
-def see_token(layer,head,word,sent,time=None):
+def see_att_token(layer,head,word,sent,time=None):
  
   tokenizer =  load_tokenizer(model_dir)
   #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
@@ -44,20 +44,23 @@ def see_token(layer,head,word,sent,time=None):
   
   dic_sent = tokens_to_sentence(bt,sp)
   
-  fram_dic = dict()
-  
- 
+  #fram_dic = dict()
   
   for tk in tokens:
-   if dic_sent[tk] == word: 
+   if dic_sent[tk] == word:
+    print('TOKEN: ' +tk)
+    print('') 
     fram = select_sub_matrix_for_token(out_dir,sent_id,layer,head,tk)
-    fram_dic[tk] = fram
-  
-  if sent == False:
-   view_word(fram_dic,tokens,word,time)
-  else:
-   view_sentence(fram_dic,tokens,word,spacy_token,time) 
-  
+    
+    if sent == True:
+     view_sentence_perc(fram,tokens,tk)
+     if time != None: 
+      view_sentence_time(fram,tokens,tk,time)
+     view_word(fram,tokens,tk,time) 
+    else:
+     view_word(fram,tokens,tk,time)
+ 
+   
 def see_pos(layer,head):
   
   #sent_path = os.path.join(sent_dir, sent_id)
@@ -109,7 +112,7 @@ def main():
     arguments, values = getopt.getopt(argument_list, options, long_options)
     if  main_option in ("h", "help","-h","--help"):
         print ("load - load matrix's sentence")
-        print("see_token [-l | --layer = <layer>] [-h | --head = <head>] [-w | --word = <word>] [-s | --sentence] [-t | --time = <time>] - show most weighted token given a word: sentence = change style of visualisation, time = select how many tokens correlated find")
+        print("see [-l | --layer = <layer>] [-h | --head = <head>] [-w | --word = <word>] [-s | --sentence] [-t | --time = <time>] - show most weighted token given a word: sentence = change style of visualisation, time = select how many tokens correlated find")
         print("pos [-l | --layer = <layer>] [-h | --head = <head>] - show the pos graph given a attention matrix")
         print("tokens - print all sentence tokens")
         print("sentence - print the sentence")
@@ -121,7 +124,7 @@ def main():
            #print("> ERROR: require id sentence")
           
      
-    elif main_option == "see_token":
+    elif main_option == "see":
     
          sent = False
          time=None
@@ -141,7 +144,7 @@ def main():
            print("> option not recognized")  
           
                    
-         see_token(layer,head,word,sent,time)
+         see_att_token(layer,head,word,sent,time)
     
     elif main_option == "tokens":
       #if arguments[0][0] != None and arguments[0][0] in ("-s","--sentence"):
@@ -166,6 +169,9 @@ def main():
            print("> option not recognized")  
         
         see_pos(layer,head)
+                
+                
+     #elif main_option == "total_view":
                 
     else:
        print("> no command here")        

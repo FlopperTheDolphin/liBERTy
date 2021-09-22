@@ -3,72 +3,102 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from vs_constants import *
 from colorama import Fore, Back, Style
+from rich.console import Console
 
-def view_sentence(fram_dic,tokens,word,spacy_token,time=None):
- print('------------------------------------------------') 
- keys = list(fram_dic.keys())
- 
+
+def view_sentence_time(fram,tokens,token,time):
+ console = Console()
+ print('') 
+# keys = list(fram_dic.keys())
+  
  red = list()
  yellow=list()
  green=list()
  
- if time == None:
-  t = 20
- else:
-  t = int(time)
+ t=int(time)
   
     
- 
- for token in keys :
-  f = fram_dic[token].tolist()  
-  network = pd.DataFrame(data=f,index=tokens,columns=[token])
-  res = network.sort_values(by=token, ascending=False)
-  res_green = res.iloc[t+t+1:t+t+t,:]
-  res_yellow = res.iloc[t+1:t+t,:]
-  res_red = res.iloc[:t,:]
-  green=green+list(res_green.index)
-  yellow=yellow+list(res_yellow.index)
-  red=red+list(res_red.index)
+ network = pd.DataFrame(data=fram.tolist(),index=tokens,columns=[token])  
+ res = network.sort_values(by=token,ascending=False)
+ res_green = res.iloc[t+t+1:t+t+t+1]
+ res_yellow = res.iloc[t+1:t+t+1]
+ res_red = res.iloc[:t]
+ green=green+list(res_green.index)
+ yellow=yellow+list(res_yellow.index)
+ red=red+list(res_red.index)
   
+
+ for tk in tokens:
   
- for token in tokens:
-  if token in keys:
+  if tk == token :
   
    color = ''
-   if token in green:
-     color = Fore.GREEN  
-   elif token in yellow :
-     color = Fore.YELLOW  
-   elif token in red:
-     color = Fore.RED     
+   if tk in green:
+     color = GREEN  
+   elif tk in yellow :
+     color = YELLOW  
+   elif tk in red:
+     color = RED     
    
-   print(Style.RESET_ALL,end='')
-   print(Back.BLUE + color + token,end=' ')
-   print(Style.RESET_ALL,end='')
+   #print(Style.RESET_ALL,end='')
+   console.print(CHOSEN_WORD+tk,style=color,end=' ', highlight=False)
+   #print(Style.RESET_ALL,end='')
       
-  elif token in green:
-     print(Fore.GREEN + token,end=' ')  
-  elif token in yellow :
-     print(Fore.YELLOW + token,end=' ')
-  elif token in red:
-     print(Fore.RED + token,end=' ')
+  elif tk in green:
+    console.print(tk,style=GREEN,end=' ', highlight=False)
+  elif tk in yellow :
+    console.print(tk,style=YELLOW,end=' ', highlight=False)
+  elif tk in red:
+    console.print(tk,style=RED,end=' ',  highlight=False)
   else:
-    print(Style.RESET_ALL + token,end=' ')  
+    print(tk,end=' ')  
   
- print(Style.RESET_ALL)    
+# print(Style.RESET_ALL)
+ print('')    
  
- print('---------------------------------------------------------------')
- print('* '+Back.BLUE+'BLUE'+Style.RESET_ALL+ ' = token analizzati')
- print('* '+Fore.RED+'ROSSO'+Style.RESET_ALL+' = token con il più alto tasso di attention')
- print('* '+Fore.YELLOW+'GIALLO'+Style.RESET_ALL+' = token con un tasso medio di attention')
- print('* '+Fore.GREEN+'VERDE'+Style.RESET_ALL+' = token con un tasso minore di attention')
- print('---------------------------------------------------------------')
+ print('--------------------------------------------------------------------')
+ console.print(CHOSEN_WORD+'SOTTOLINEATO',end=' ', highlight=False) 
+ print('= token analizzato')
+ console.print('ROSSO' ,style=RED,end=' ', highlight=False) 
+ print('= i primi '+ str(t)+' token con il più alto valore di attention per ' + token)
+ console.print('GIALLO',style=YELLOW,end=' ', highlight=False) 
+ print('= da '+ str(int(t+1)) +' a '+str(int(t+t))+' token con più al valore di attention per ' + token)
+ console.print('VERDE',style=GREEN,end=' ', highlight=False) 
+ print('= da '+ str(int(t+t+1)) +' a '+str(int(t+t+t))+' token con il più alto valore attention di per ' + token)
+ print('--------------------------------------------------------------------')
  
+ print('')
+ print('')
+ 
+def view_sentence_perc(fram,tokens,token):
+  
+ console = Console()
+ #keys = list(fram_dic.keys())
+ dic_perc = dict()
+ 
+ #for token in keys :
+ #f = fram.tolist()  
+ #network = pd.DataFrame(data=f,columns=[token])
+ network = fram
+ max_val = network.sort_values(ascending=False).iloc[0]
+  
+   
+  #visualize for each token in keys 
+ 
+ for i in range(len(tokens)):
+  if tokens[i] == token:
+   x =255 - (network.iloc[i]*255)/max_val
+   console.print("[underline]"+token,style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
+  else:
+   x =255 - (network.iloc[i]*255)/max_val
+   #(255,0/255,0)
+   console.print(str(tokens[i]),style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
+      
+ print('')
+ print('')
  
 
-def view_word(fram_dic,tokens,word,time=None):
-
- print('token individuati per la parola ' + word)
+def view_word(fram,tokens,token,time=None):
 
  if time == None:
   t = 20
@@ -76,18 +106,15 @@ def view_word(fram_dic,tokens,word,time=None):
   t = time 
   
  
- for token in list(fram_dic.keys()):
-  f = fram_dic[token].tolist()
-  network = pd.DataFrame(data=f,index=tokens,columns=[token])
-  res = network.sort_values(by=token, ascending=False)
-  res=res.iloc[:int(t),:]
- 
- #print(network)
-  print('--------------- Parole con la più alta corrispondenza ' + token + ' --------------')
-  print(res)
+ f = fram.tolist()
+ network = pd.DataFrame(data=f,index=tokens,columns=[token])
+ res = network.sort_values(by=token, ascending=False)
+ res=res.iloc[:int(t),:]
+ print('Primi ' +str(t)+' token con il più alto valore di attention per ' + token)
+ print(res)
+ print('')
  
  
-  
 def view_mtx_pos(dic_edge,dic_pos):
  G = nx.Graph()
  
