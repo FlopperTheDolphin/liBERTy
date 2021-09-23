@@ -1,5 +1,6 @@
 import sys
 import os
+import json
 #from pp.pre_processing import extract_text_from_request
 import xml.etree.ElementTree as ET
 import requests
@@ -49,4 +50,17 @@ def load_matrix(out_dir,id_sent,layer,head):
 def load_tokenizer(bert_path):
  return AutoTokenizer.from_pretrained(bert_path)
   
+def load_from_json(name,path_file):
+
+ f = open(path_file,'r')
+ data = json.load(f)
  
+ 
+ f.close()
+ return data 
+
+def save_in_json(name,path_file):
+ out_file = open(path_file, "w") 
+ json.dump(name, out_file, indent = 6)    
+ out_file.close() 
+

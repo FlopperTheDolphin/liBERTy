@@ -63,8 +63,13 @@ def see_att_token(layer,head,word,sent,time=None):
    
 def see_pos(layer,head):
   
-  #sent_path = os.path.join(sent_dir, sent_id)
-  #sentence,id_sent = load_sentence(sent_path)
+  path_graph = os.path.join(os.path.join(out_dir,sent_id),"pos-graph_layer-"+str(layer)+"_head-"+str(head)+".json")
+  
+  if not os.path.exists(path_graph):
+    os.mknod(path_graph)
+    
+  if(view_loaded_pos(path_graph) == True):
+   return  
   
   nlp = spacy.load("it_core_news_sm")
   doc = nlp(sentence)
@@ -79,13 +84,18 @@ def see_pos(layer,head):
   
   bt = list() + bert_token
   
-  dic_tokens = labelizer(bt,spacy_token)
+  path_cache = os.path.join(os.path.join(out_dir, sent_id),"token_pos.json") 
+  
+  if not os.path.exists(path_cache):
+    os.mknod(path_cache)
+  
+  dic_tokens = labelizer(bt,spacy_token,path_cache)
   
   att_mtx = load_matrix(out_dir,sent_id,layer,head)
   
   dic_pos,dic_edge = get_pos_mtx(att_mtx,dic_tokens,bert_token)
   
-  view_mtx_pos(dic_edge,dic_pos)  
+  view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph)  
 
 def main():
 	

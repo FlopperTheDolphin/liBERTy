@@ -1,10 +1,11 @@
 import networkx as nx
+from networkx.readwrite import json_graph
 import pandas as pd
 import matplotlib.pyplot as plt
 from vs_constants import *
 from colorama import Fore, Back, Style
 from rich.console import Console
-
+from loader import save_in_json, load_from_json
 
 def view_sentence_time(fram,tokens,token,time):
  console = Console()
@@ -115,33 +116,83 @@ def view_word(fram,tokens,token,time=None):
  print('')
  
  
-def view_mtx_pos(dic_edge,dic_pos):
+def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph):
  G = nx.Graph()
  
- for pos in dic_pos.keys():
-  G.add_node(pos)
- 
  keys = list(dic_pos.keys())
+ 
+ l=list()
+ for i in range(len(keys)):
+  pos1 = keys[i]
+  for j in range(i+1):
+   pos2 = keys[j]
+   l.append(dic_edge[dic_pos[pos1]+dic_pos[pos2]])
+ 
+ 
+ l.sort(reverse=True)
+ max_v = l[0]
+ print(str(max_v))   
+ 
+ for pos in dic_pos.keys():
+  w = (dic_edge[dic_pos[pos]+dic_pos[pos]])*100/max_v  
+  if w < 50: 
+   G.add_node(pos,color_node='green')
+  elif w < 75:
+   G.add_node(pos,color_node='yellow')
+  else:
+   G.add_node(pos,color_node='red')  
+   
   
  for i in range(len(keys)):
   pos1 = keys[i]
   for j in range(i+1):
    pos2 = keys[j]
-   if dic_edge[dic_pos[pos1]+dic_pos[pos2]] > 15:  
-    G.add_edge(pos1,pos2,color='r',d=str(pos1)+' '+str(pos2),weight=dic_edge[dic_pos[pos1]+dic_pos[pos2]])
- #  elif dic_edge[dic_pos[pos1]+dic_pos[pos2]] > 10:
-  #  G.add_edge(pos1,pos2,color='b',d=str(pos1)+' '+str(pos2),weight=dic_edge[dic_pos[pos1]+dic_pos[pos2]]) 
-  # else:
-  #  G.add_edge(pos1,pos2,color='g',d=str(pos1)+' '+str(pos2),weight=dic_edge[dic_pos[pos1]+dic_pos[pos2]])         
+   
+   w = (dic_edge[dic_pos[pos1]+dic_pos[pos2]])*100/max_v  
+   if w < 50:
+    G.add_edge(pos1,pos2,label='',weight=float(w),color="green")
+   elif w < 75:
+    if pos1 != pos2:
+     G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="yellow")
+    else:
+     G.add_edge(pos1,pos2,label='',weight=float(w),color="yellow")
+   else:
+    if pos1 != pos2:
+     G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="red")  
+    else:
+     G.add_edge(pos1,pos2,label='',weight=float(w),color="red")   
  
+
+ data = json_graph.node_link_data(G)
+ save_in_json(data,path_graph)
+ 
+ draw_graph(G)	
+ 
+def view_loaded_pos(path):
+  try:  
+   data = load_from_json("G",path)
+   G=json_graph.node_link_graph(data) 
+   draw_graph(G)
+   return True
+  except Exception:
+   return False 
+
+
+def draw_graph(G):
  pos= nx.spring_layout(G)
- 
  
  colors = nx.get_edge_attributes(G,'color').values()
  weights = nx.get_edge_attributes(G,'weight').values() 
- 
- nx.draw(G,pos,with_labels=True,
- #         width=list(weights),
-          edge_color=colors)
+ labels =  nx.get_edge_attributes(G,'label')
+ color_node = nx.get_node_attributes(G,'color_node').values()
+
+ nx.draw(G,pos,with_labels=True,#,
+           node_color=color_node,
+           edge_color=colors)
+           
+ nx.draw_networkx_edge_labels(G, pos, edge_labels = labels)          
+           
+           
  plt.show()	
- 
+  
+

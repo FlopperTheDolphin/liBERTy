@@ -86,25 +86,33 @@ def tokens_to_sentence(l1,l2,dic = None):
  return dic   
 
  
-def labelizer(l1,l2,dic=None):
- if dic == None:
-  dic = dict()
+def labelizer(l1,l2,path_cache,dic_token=None):
+
+ if dic_token == None:
+  try:
+   dic_token = load_from_json("dic_token",path_cache)
+   return dic_token
+  except Exception:  
+   dic_token = dict()
   
  if len(l2)==0 or len(l1)==0:
-  dic['[SEP]']='[SEP]'
-  return dic
+  dic_token['[SEP]']='[SEP]'
+  save_in_json(dic_token,path_cache)
+  return dic_token
  
  s = l1.pop(0)
  
  if(s == '[CLS]'):
-  dic[s] = '[CLS]' 
-  labelizer(l1,l2,dic)
-  return dic
+  dic_token[s] = '[CLS]' 
+  labelizer(l1,l2,path_cache,dic_token)
+  save_in_json(dic_token,path_cache)
+  return dic_token
   
  if(s == '[SEP]'):
-  dic[s] = '[SEP]'
-  labelizer(l1,l2,dic)
-  return dic 
+  dic_token[s] = '[SEP]'
+  labelizer(l1,l2,path_cache,dic_token)
+  save_in_json(dic_token,path_cache)
+  return dic_token 
    
  obj_v = l2.pop(0)
  v = str(obj_v)
@@ -121,10 +129,11 @@ def labelizer(l1,l2,dic=None):
   s = s+t 
  
  for token in k:
-  dic[token] = obj_v.pos_ 
+  dic_token[token] = obj_v.pos_ 
    
- labelizer(l1,l2,dic)
- return dic   
+ labelizer(l1,l2,path_cache,dic_token)
+ save_in_json(dic_token,path_cache)
+ return dic_token   
 
 def update_pos(pos=None,dic=None):
  if pos == None:
@@ -150,7 +159,9 @@ def get_pos_mtx(att_mtx,dic_tokens,tokens):
     pos1 = dic_tokens[token1]
     dic_pos = update_pos(pos1,dic_pos)
     column = att_mtx[token1].tolist()
+    
     for j in range(i+1):
+     
      token2 = tokens[j]
      weight = column[j]
      pos2 = dic_tokens[token2]
