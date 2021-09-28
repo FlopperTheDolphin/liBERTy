@@ -6,7 +6,6 @@ from vs_constants import *
 from colorama import Fore, Back, Style
 from rich.console import Console
 from loader import save_in_json, load_from_json
-
 def view_sentence_time(fram,tokens,token,time):
  console = Console()
  print('') 
@@ -71,7 +70,7 @@ def view_sentence_time(fram,tokens,token,time):
  print('')
  print('')
  
-def view_sentence_perc(fram,tokens,token):
+def view_sentence_perc(fram,tokens,token,layer,head,mx):
   
  console = Console()
  #keys = list(fram_dic.keys())
@@ -85,13 +84,17 @@ def view_sentence_perc(fram,tokens,token):
   
    
   #visualize for each token in keys 
- 
+ m = mx[str((int(layer)+1,int(head)+1))]
+ print('Valore di attention massimo nella matrice: ' + str(m))
+ print('')
  for i in range(len(tokens)):
   if tokens[i] == token:
    x =255 - (network.iloc[i]*255)/max_val
+   #x =255 - (network.iloc[i]*255)/m
    console.print("[underline]"+token,style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
   else:
    x =255 - (network.iloc[i]*255)/max_val
+   #x =255 - (network.iloc[i]*255)/m
    #(255,0/255,0)
    console.print(str(tokens[i]),style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
       
@@ -149,14 +152,14 @@ def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph):
    pos2 = keys[j]
    
    w = (dic_edge[dic_pos[pos1]+dic_pos[pos2]])*100/max_v  
-   if w < 50:
-    G.add_edge(pos1,pos2,label='',weight=float(w),color="green")
-   elif w < 75:
-    if pos1 != pos2:
-     G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="yellow")
-    else:
-     G.add_edge(pos1,pos2,label='',weight=float(w),color="yellow")
-   else:
+   #if w < 50:
+   # G.add_edge(pos1,pos2,label='',weight=float(w),color="green")
+   #if w < 75:
+    #if pos1 != pos2:
+     #G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="yellow")
+    #else:
+     #G.add_edge(pos1,pos2,label='',weight=float(w),color="yellow")
+   if w >= 75:
     if pos1 != pos2:
      G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="red")  
     else:
@@ -170,7 +173,7 @@ def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph):
  
 def view_loaded_pos(path):
   try:  
-   data = load_from_json("G",path)
+   data = load_from_json(path)
    G=json_graph.node_link_graph(data) 
    draw_graph(G)
    return True
@@ -195,4 +198,24 @@ def draw_graph(G):
            
  plt.show()	
   
+def view_token_div(df,tk,list_index):
+ console = Console()
+ df=df.sort_values(by='divergence',ascending=False) 
+ max_v=df.iloc[0,0]
+ j=1
+ for i in range(len(list_index)): 
+  x =255 - (df.loc[list_index[i]]*255)/max_v
+   #(255,0/255,0)
+  console.print('$',style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
+  
+  if((i+1)%12 == 0):
+   print('')
+   
+ print('')
+ print('----------------------------------')    
+ print('Prime 10 matrici più divergenti:')
+ print(df.iloc[1:10,:])
+ print('----------------------------------') 
+  
+
 

@@ -50,12 +50,9 @@ def load_matrix(out_dir,id_sent,layer,head):
 def load_tokenizer(bert_path):
  return AutoTokenizer.from_pretrained(bert_path)
   
-def load_from_json(name,path_file):
-
+def load_from_json(path_file):
  f = open(path_file,'r')
  data = json.load(f)
- 
- 
  f.close()
  return data 
 
