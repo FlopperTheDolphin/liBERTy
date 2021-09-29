@@ -208,15 +208,15 @@ def view_token_div(df,tk,list_index):
  for i in range(len(list_index)): 
   x =255 - (df.loc[list_index[i]]*255)/max_v
    #(255,0/255,0)
-  console.print('$',style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
-  
+  console.print('$',style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)  
   if((i+1)%12 == 0):
    print('')
    
  print('')
- print('----------------------------------')    
- print('Prime 10 matrici più divergenti:')
- print(df.iloc[1:10,:])
+ print('----------------------------------')  
+  
+ print('Prime 10 matrici più divergenti:') 
+ print(df.iloc[0:10,:])
  print('----------------------------------') 
 
   
@@ -229,11 +229,10 @@ def view_att_total(name,list_weight,tokens):
    #(255,0/255,0)
   console.print(str(tokens[i]),style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
   
-   
  print('')
  print('----------------------------------')    
  print('Primi 10 token:')
- print(res.iloc[1:10,:])
+ print(res.iloc[0:10,:])
  print('----------------------------------') 
 
    

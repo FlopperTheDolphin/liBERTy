@@ -248,5 +248,4 @@ def comp_token_weight(tokens,layer,head,name,out_dir):
    l.append(s)
    
   return l
- 
-   
+  

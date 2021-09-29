@@ -88,17 +88,69 @@ def see_att_token(name,layer,head,word,sent,cls,time=None):
      view_word(fram,tokens,tk,time)
       
 
-def see_stat(name,token):
-  print('frase: ' + name)
+def see_stat(name,token=None,perc=None):
   dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
   sentence = dic_sent['sentence']
   tokenizer =  load_tokenizer(model_dir)
-  tokens = comp_token(tokenizer,sentence)        
-  dic_att = get_all_att_sentece(out_dir,name,token)
-  n_token = len(tokens)
-  df,l=comp_divergence(dic_att,n_token)
-  view_token_div(df,token,l)
-     
+  tokens = comp_token(tokenizer,sentence)
+  
+  if token != None:
+   print('frase: ' + name)        
+   dic_att = get_all_att_sentece(out_dir,name,token)
+   n_token = len(tokens)
+   df,l=comp_divergence(dic_att,n_token)
+   view_token_div(df,token,l)
+  else:
+   if perc == None:
+    perc = 80
+    m = 100
+   else:
+    m = int(perc)+10 
+   freq_path=os.path.join(os.path.join(out_dir,name),"head_offset_"+str(perc)+".json")
+   token_path=os.path.join(os.path.join(out_dir,name),"token_offset_"+str(perc)+".json")
+   
+   if not os.path.exists(freq_path) or not os.path.exists(token_path):
+    dic_head = dict()
+    dic_token = dict()
+    n_token = len(tokens)
+    for tk in tokens:
+     print('> TOKEN: ' + str(tk))
+     dic_att = get_all_att_sentece(out_dir,name,tk) 
+     df,l=comp_divergence(dic_att,n_token) 
+     q = list(df.loc[(df['divergence'] >= (int(perc)/100)) & (df['divergence'] <= (int(m)/100))].index.values) 
+     print('> head con maggiore divergenza: ' + str(q))
+     for h in q:
+      if h in dic_head.keys():
+       dic_head[h] = dic_head[h] + 1
+      else:
+       dic_head[h] = 1
+     index_l=l       
+     dic_token[tk] = q
+    
+    save_in_json(dic_head,freq_path)
+    save_in_json(dic_token,token_path)
+   else:
+    dic_token = load_from_json(token_path)
+    dic_head = load_from_json(freq_path)
+    
+   print('> matrici offset calcolate: ' + str(dic_head))
+   
+   l_sos = sorted(dic_head.items(), key=lambda x: x[1])[0:3]
+   
+   print('> matrici sospette: ' + str(l_sos))
+   
+   for tk in tokens:
+    l_h = dic_token[tk]
+    for h in l_h:
+     for i in range(len(l_sos)):
+      if h in l_sos[i]:
+       print('> token sospetto: ' + str(tk) + ' in  ' + str(l_sos[i]))  
+       
+    
+    # Parte aggiunta per controllare se per caso in ogni token esistesse qualche informazione tra le head trovate
+    # infatti sono state prese in considerazione le head con una frequenza minore nel calcolo max di divergenze di shannon
+    # purtroppo niente di nuovo, anzi le head hanno mostrato fenomeni di offset singolari in quelle head isolate
+        
    
 def see_pos(name,layer,head):
   dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
@@ -167,8 +219,8 @@ def main():
 
 
  argument_list = sys.argv[2:]
- options = "l:h:w:sct:f:i:n:"
- long_options = ["layer","head","word","sentence","time","class","file","id","name"]
+ options = "l:h:w:sct:f:i:n:p:"
+ long_options = ["layer","head","word","sentence","time","class","file","id","name","perc"]
  
  try:
     arguments, values = getopt.getopt(argument_list, options, long_options)
@@ -193,7 +245,6 @@ def main():
     elif main_option == "see":
     
          sent = False
-         stat = False
          cls = False
          time=None
          for current_arg in arguments:
@@ -231,13 +282,17 @@ def main():
      
     elif main_option == "stat":
     
+     token = None    
+     perc=None
      for current_arg in arguments:
       if current_arg[0] in ("-t","--token"):
             token= current_arg[1]
       elif current_arg[0] in ("-n","--name"):
-            name= current_arg[1]      
+            name= current_arg[1]            
+      elif current_arg[0] in ("-p","--perc"):
+            perc= current_arg[1]                  
             
-     see_stat(name,token)
+     see_stat(name,token,perc)
      
     elif main_option == "pos":
     
