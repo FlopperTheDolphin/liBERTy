@@ -10,12 +10,12 @@ from view import *
 
 
 # save matrix in a file
-def load(sentence,sent_id): 
+def load(sentence,sent_id,name): 
   
  tokenizer,model = load_model(model_dir,model_dir)
  #sent_path = os.path.join(sent_dir, sent_id)
  attentions,tokens = comp_matrix(tokenizer,model,sentence)
- mtx_path = os.path.join(out_dir, sent_id)
+ mtx_path = os.path.join(out_dir, name)
  max_path= os.path.join(mtx_path,"max.json")
  sent_path= os.path.join(mtx_path,"sentence.json")
  if(not os.path.isdir(mtx_path)): 
@@ -26,15 +26,28 @@ def load(sentence,sent_id):
  save_in_json(dic_sent,sent_path)
  att_max = save_matrix(mtx_path,tokens,attentions)
 
-def tokens(sent_id):
- dic_sent = load_from_json(os.path.join(os.path.join(out_dir, sent_id),'sentence.json'))
+def tokens(name):
+ dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
  sentence = dic_sent['sentence']
  tokenizer =  load_tokenizer(model_dir)
  #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
  print(comp_token(tokenizer,sentence))
 
-def see_att_token(sent_id,layer,head,word,sent,cls,time=None):
-  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, sent_id),'sentence.json'))
+def see_total(name,layer,head):
+  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
+  sentence = dic_sent['sentence']
+  tokenizer =  load_tokenizer(model_dir)
+  tokens = comp_token(tokenizer,sentence)
+  
+  list_weight=comp_token_weight(tokens,layer,head,name,out_dir)
+  
+  view_att_total(name,list_weight,tokens)
+  
+  
+   
+
+def see_att_token(name,layer,head,word,sent,cls,time=None):
+  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
   sentence = dic_sent['sentence']
   tokenizer =  load_tokenizer(model_dir)
   #sent_path = os.path.join(sent_dir, sent_id) + ".xml"
@@ -49,7 +62,7 @@ def see_att_token(sent_id,layer,head,word,sent,cls,time=None):
   sp = list()+spacy_token 
   bt = list()+tokens 
   
-  mtx_dir = os.path.join(out_dir, sent_id)
+  mtx_dir = os.path.join(out_dir, name)
   
   path_cache = os.path.join(mtx_dir,"token_sent.json") 
   
@@ -62,7 +75,7 @@ def see_att_token(sent_id,layer,head,word,sent,cls,time=None):
    if dic_sent[tk] == word:
     print('TOKEN: ' +tk)
     print('') 
-    fram = select_sub_matrix_for_token(out_dir,sent_id,layer,head,tk)
+    fram = select_sub_matrix_for_token(out_dir,name,layer,head,tk)
     
     if sent == True:
      max_path= os.path.join(mtx_dir,"max.json")
@@ -75,21 +88,22 @@ def see_att_token(sent_id,layer,head,word,sent,cls,time=None):
      view_word(fram,tokens,tk,time)
       
 
-def see_stat(sent_id,token):
-  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, sent_id),'sentence.json'))
+def see_stat(name,token):
+  print('frase: ' + name)
+  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
   sentence = dic_sent['sentence']
   tokenizer =  load_tokenizer(model_dir)
   tokens = comp_token(tokenizer,sentence)        
-  dic_att = get_all_att_sentece(out_dir,sent_id,token)
+  dic_att = get_all_att_sentece(out_dir,name,token)
   n_token = len(tokens)
   df,l=comp_divergence(dic_att,n_token)
   view_token_div(df,token,l)
      
    
-def see_pos(sent_id,layer,head):
-  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, sent_id),'sentence.json'))
+def see_pos(name,layer,head):
+  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
   sentence = dic_sent['sentence']
-  path_graph = os.path.join(os.path.join(out_dir,sent_id),"pos-graph_layer-"+str(layer)+"_head-"+str(head)+".json")
+  path_graph = os.path.join(os.path.join(out_dir,name),"pos-graph_layer-"+str(layer)+"_head-"+str(head)+".json")
   
   if not os.path.exists(path_graph):
     os.mknod(path_graph)
@@ -113,14 +127,14 @@ def see_pos(sent_id,layer,head):
   
   bt = list() + bert_token
   
-  path_cache = os.path.join(os.path.join(out_dir, sent_id),"token_pos.json") 
+  path_cache = os.path.join(os.path.join(out_dir, name),"token_pos.json") 
   
   if not os.path.exists(path_cache):
     os.mknod(path_cache)
   
   dic_tokens = labelizer(bt,spacy_token,path_cache)
   
-  att_mtx = load_matrix(out_dir,sent_id,layer,head)
+  att_mtx = load_matrix(out_dir,name,layer,head)
   
   dic_pos,dic_edge = get_pos_mtx(att_mtx,dic_tokens,bert_token)
   
@@ -142,7 +156,7 @@ def main():
  parser = ConfigParser()
  parser.read("config.txt")
  
- global model_dir, out_dir, sent_dir, sentence,sent_id  
+ global model_dir, out_dir, sent_dir   
  model_dir = parser.get("config", "model_dir") 
  out_dir = parser.get("config", "out_dir")
  sent_dir = parser.get("config", "sent_dir")
@@ -153,8 +167,8 @@ def main():
 
 
  argument_list = sys.argv[2:]
- options = "l:h:w:sct:f:i:"
- long_options = ["layer","head","word","sentence","time","class","file","id"]
+ options = "l:h:w:sct:f:i:n:"
+ long_options = ["layer","head","word","sentence","time","class","file","id","name"]
  
  try:
     arguments, values = getopt.getopt(argument_list, options, long_options)
@@ -166,10 +180,12 @@ def main():
         print("sentence - print the sentence")
              
     elif main_option == "load":
-    
-          if arguments[0][0] != None and arguments[0][0] in ("-f","--file"):
-           sentence,sent_id = read_sentence(arguments[0][1])
-           load(sentence,sent_id)
+          for current_arg in arguments:
+           if current_arg[0] in ("-f","--file"):
+            sentence,sent_id = read_sentence(current_arg[1])
+           elif current_arg[0] in ("-n","--name"):
+            name= current_arg[1]
+          load(sentence,sent_id,name)
           #else:
            #print("> ERROR: require id sentence")
           
@@ -188,28 +204,28 @@ def main():
            head = current_arg[1]
           elif current_arg[0] in ("-w","--word"):
            word = current_arg[1]
-          elif current_arg[0] in ("-i","--id"):
-           sent_id= current_arg[1]      
           elif current_arg[0] in ("-s","--sentence"):
            sent = True 
           elif current_arg[0] in ("-t","--time"):
            time = current_arg[1] 
           elif current_arg[0] in ("-c","--class"):
            cls = True
+          elif current_arg[0] in ("-n","--name"):
+           name = current_arg[1] 
           else:
            print("> option not recognized")  
           
                    
-         see_att_token(sent_id,layer,head,word,sent,cls,time)
+         see_att_token(name,layer,head,word,sent,cls,time)
     
     elif main_option == "tokens":
-      if arguments[0][0] != None and arguments[0][0] in ("-i","--id"):
+      if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
        tokens(arguments[0][1])
       #else:
       # print("> ERROR: require id sentence")
     
     elif main_option == "sentence":
-     if arguments[0][0] != None and arguments[0][0] in ("-i","--id"):
+     if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
       dic_sent = load_from_json(os.path.join(os.path.join(out_dir, arguments[0][1]),'sentence.json'))
       print(dic_sent['sentence'])
      
@@ -218,17 +234,17 @@ def main():
      for current_arg in arguments:
       if current_arg[0] in ("-t","--token"):
             token= current_arg[1]
-      elif current_arg[0] in ("-i","--id"):
-            sent_id= current_arg[1]      
+      elif current_arg[0] in ("-n","--name"):
+            name= current_arg[1]      
             
-     see_stat(sent_id,token)
+     see_stat(name,token)
      
     elif main_option == "pos":
     
         for current_arg in arguments:
  
-          if current_arg[0] in ("-i","--id"):
-           sent_id = current_arg[1]
+          if current_arg[0] in ("-n","--name"):
+           name = current_arg[1]
           elif current_arg[0] in ("-l","--layer"):
            layer= current_arg[1]
           elif current_arg[0] in ("-h","--head"):
@@ -236,10 +252,20 @@ def main():
           else:
            print("> option not recognized")  
         
-        see_pos(sent_id,layer,head)
-                
-                
-     #elif main_option == "total_view":
+        see_pos(name,layer,head)
+                          
+    elif main_option == "see_total":
+       for current_arg in arguments:
+ 
+          if current_arg[0] in ("-n","--name"):
+           name = current_arg[1]
+          elif current_arg[0] in ("-l","--layer"):
+           layer= current_arg[1]
+          elif current_arg[0] in ("-h","--head"):
+           head = current_arg[1]
+          else:
+           print("> option not recognized")  
+       see_total(name,layer,head) 
                 
     else:
        print("> no command here")        

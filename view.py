@@ -3,7 +3,7 @@ from networkx.readwrite import json_graph
 import pandas as pd
 import matplotlib.pyplot as plt
 from vs_constants import *
-from colorama import Fore, Back, Style
+#from colorama import Fore, Back, Style
 from rich.console import Console
 from loader import save_in_json, load_from_json
 def view_sentence_time(fram,tokens,token,time):
@@ -84,7 +84,7 @@ def view_sentence_perc(fram,tokens,token,layer,head,mx):
   
    
   #visualize for each token in keys 
- m = mx[str((int(layer)+1,int(head)+1))]
+ m = mx[str((int(layer),int(head)))]
  print('Valore di attention massimo nella matrice: ' + str(m))
  print('')
  for i in range(len(tokens)):
@@ -199,6 +199,8 @@ def draw_graph(G):
  plt.show()	
   
 def view_token_div(df,tk,list_index):
+ print('TOKEN: ' +tk)
+ print('')
  console = Console()
  df=df.sort_values(by='divergence',ascending=False) 
  max_v=df.iloc[0,0]
@@ -216,6 +218,26 @@ def view_token_div(df,tk,list_index):
  print('Prime 10 matrici più divergenti:')
  print(df.iloc[1:10,:])
  print('----------------------------------') 
+
   
+def view_att_total(name,list_weight,tokens):
+ console=Console()
+ res=pd.DataFrame(data=list_weight,index=tokens,columns=['tokens']).sort_values(by='tokens',ascending=False)
+ max_v = res.iloc[0,0]
+ for i in range(len(tokens)): 
+  x =255 - (list_weight[i]*255)/max_v
+   #(255,0/255,0)
+  console.print(str(tokens[i]),style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
+  
+   
+ print('')
+ print('----------------------------------')    
+ print('Primi 10 token:')
+ print(res.iloc[1:10,:])
+ print('----------------------------------') 
+
+   
+    
+
 
 

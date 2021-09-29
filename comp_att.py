@@ -39,7 +39,10 @@ def save_matrix(dir_path,tokens,attentions,verbose = True):
 
 def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
  mtx = load_matrix(out_dir,id_sent,layer,head)
- fram = mtx[token]
+ try:
+  fram = mtx[token]
+ except Exception:
+  fram = mtx['##'+token] 
  
  return fram
  
@@ -89,15 +92,15 @@ def tokens_to_sentence(l1,l2,path_cache,dic = None,old_sen=None):
  k=list()
  k.append(s)
  
- print('v: '+str(v))
+ #print('v: '+str(v))
    
  while(v != s and len(l1) != 0):
   t = l1.pop(0)
-  print('t: '+str(t))
+  #print('t: '+str(t))
   k.append(t)
   t= t.replace('##','') 
   s = s+t
-  print('s: '+str(s))
+ # print('s: '+str(s))
    
  for token in k:
   dic[token] = v 
@@ -139,7 +142,7 @@ def labelizer(l1,l2,path_cache,dic_token=None,old_pos=None):
  if '##' in  s:
   dic_token[s] = old_pos
   l2.pop(0)
-  print('## trovato in: ' + str(s))
+  
   labelizer(l1,l2,path_cache,dic_token,old_pos)
   save_in_json(dic_token,path_cache)
   return dic_token
@@ -238,5 +241,12 @@ def comp_divergence(dic_att,n_token):
   
  return df,index_list
   
+def comp_token_weight(tokens,layer,head,name,out_dir):
+  l=list()
+  for tk in tokens:
+   s = select_sub_matrix_for_token(out_dir,name,layer,head,tk).sum(axis=0)
+   l.append(s)
+   
+  return l
  
    
