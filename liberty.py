@@ -135,9 +135,11 @@ def see_stat(name,token=None,perc=None):
     
    print('> matrici offset calcolate: ' + str(dic_head))
    
-   l_sos = sorted(dic_head.items(), key=lambda x: x[1])[0:3]
+   q_sos = sorted(dic_head.items(), key=lambda x: x[1])
+   l_sos = q_sos[0:3]
    
-   print('> matrici sospette: ' + str(l_sos))
+   print('> matrici con valore compreso tra '+ str(m) +' e ' + str(perc) + ' trovate:')
+   print(str(q_sos))
    
    for tk in tokens:
     l_h = dic_token[tk]
@@ -150,7 +152,29 @@ def see_stat(name,token=None,perc=None):
     # Parte aggiunta per controllare se per caso in ogni token esistesse qualche informazione tra le head trovate
     # infatti sono state prese in considerazione le head con una frequenza minore nel calcolo max di divergenze di shannon
     # purtroppo niente di nuovo, anzi le head hanno mostrato fenomeni di offset singolari in quelle head isolate
-        
+
+def who(name,layer,head,perc):
+ dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
+ sentence = dic_sent['sentence']
+ tokenizer =  load_tokenizer(model_dir)
+ tokens = comp_token(tokenizer,sentence)
+  
+ freq_path=os.path.join(os.path.join(out_dir,name),"head_offset_"+str(perc)+".json")
+ token_path=os.path.join(os.path.join(out_dir,name),"token_offset_"+str(perc)+".json")  
+ if not os.path.exists(token_path):
+  print('> file token_offset_' + str(perc)+'.json non trovato, eseguire il comando python liberty stat -n ' + name + ' -p ' + str(perc))
+  return
+ 
+# head_n = str('('+str(layer)+','+str(head)+')')
+ head_n = '('+str(layer)+', '+str(head)+')'
+ dic_token = load_from_json(token_path)
+ 
+ print('> token con divergenza compresa tra ' + str(perc) +' e ' + str(int(perc)+10) + ' nella head ' + str(head_n) + ' ')
+ for tk in tokens:
+  if head_n in dic_token[tk]: 
+   print(str(tk),end=' ')
+ print('')   
+
    
 def see_pos(name,layer,head):
   dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
@@ -159,8 +183,15 @@ def see_pos(name,layer,head):
   
   if not os.path.exists(path_graph):
     os.mknod(path_graph)
+  
+  path_img = os.path.join(os.path.join(out_dir, name),"img-graph_layer-"+str(layer)+"_head-"+str(head)+".png")
+  
+  if not os.path.exists(path_img):
+   save = True
+  else:
+   save = False 
     
-  if(view_loaded_pos(path_graph) == True):
+  if(view_loaded_pos(path_graph,path_img,save) == True):
    return  
   
   nlp = spacy.load("it_core_news_sm")
@@ -190,7 +221,8 @@ def see_pos(name,layer,head):
   
   dic_pos,dic_edge = get_pos_mtx(att_mtx,dic_tokens,bert_token)
   
-  view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph)  
+  
+  view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph,path_img,save)  
 
 
 def read_sentence(file_path):
@@ -321,7 +353,21 @@ def main():
           else:
            print("> option not recognized")  
        see_total(name,layer,head) 
-                
+      
+    elif main_option == "who":
+       for current_arg in arguments:
+ 
+          if current_arg[0] in ("-n","--name"):
+           name = current_arg[1]
+          elif current_arg[0] in ("-l","--layer"):
+           layer= current_arg[1]
+          elif current_arg[0] in ("-h","--head"):
+           head = current_arg[1]
+          elif current_arg[0] in ("-p","--perc"):
+           perc = current_arg[1] 
+          else:
+           print("> option not recognized")  
+       who(name,layer,head,perc)             
     else:
        print("> no command here")        
  except getopt.error as err:

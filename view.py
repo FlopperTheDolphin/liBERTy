@@ -119,7 +119,9 @@ def view_word(fram,tokens,token,time=None):
  print('')
  
  
-def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph):
+def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph,path_img,save):
+
+
  G = nx.Graph()
  
  keys = list(dic_pos.keys())
@@ -136,16 +138,21 @@ def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph):
  max_v = l[0]
  print(str(max_v))   
  
+
+ 
  for pos in dic_pos.keys():
-  w = (dic_edge[dic_pos[pos]+dic_pos[pos]])*100/max_v  
+  w = (dic_edge[dic_pos[pos]+dic_pos[pos]])*100/max_v
+  s=0
+  for pos2 in dic_pos.keys(): 
+   s = s+ dic_edge[dic_pos[pos]+dic_pos[pos]]*25
   if w < 50: 
-   G.add_node(pos,color_node='green')
+   G.add_node(pos,color_node='green',size=int(s))
   elif w < 75:
-   G.add_node(pos,color_node='yellow')
+   G.add_node(pos,color_node='yellow',size=int(s))
   else:
-   G.add_node(pos,color_node='red')  
-   
-  
+   G.add_node(pos,color_node='red',size=int(s))  
+
+
  for i in range(len(keys)):
   pos1 = keys[i]
   for j in range(i+1):
@@ -153,50 +160,64 @@ def view_mtx_pos(dic_edge,dic_pos,path_cache,path_graph):
    
    w = (dic_edge[dic_pos[pos1]+dic_pos[pos2]])*100/max_v  
    #if w < 50:
-   # G.add_edge(pos1,pos2,label='',weight=float(w),color="green")
+    #G.add_edge(pos1,pos2,label='',color="green")
    #if w < 75:
-    #if pos1 != pos2:
-     #G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="yellow")
+   # if pos1 != pos2:
+    # G.add_edge(pos1,pos2,label='',color="yellow")
     #else:
-     #G.add_edge(pos1,pos2,label='',weight=float(w),color="yellow")
-   if w >= 75:
+    # G.add_edge(pos1,pos2,label='',color="yellow")
+   if w >= 75 and w < 90:
     if pos1 != pos2:
-     G.add_edge(pos1,pos2,label=str(pos1)+' '+str(pos2),weight=float(w),color="red")  
+     G.add_edge(pos1,pos2,label='',color='blue')  
     else:
-     G.add_edge(pos1,pos2,label='',weight=float(w),color="red")   
+     G.add_edge(pos1,pos2,label='',color='blue')   
+   elif w >=90: 
+    if pos1 != pos2:
+     G.add_edge(pos1,pos2,label='',color="red")  
+    else:
+     G.add_edge(pos1,pos2,label='',color="red")   
  
-
  data = json_graph.node_link_data(G)
  save_in_json(data,path_graph)
  
- draw_graph(G)	
+ draw_graph(G,path_img,save)	
  
-def view_loaded_pos(path):
+def view_loaded_pos(path,path_img,save):
   try:  
    data = load_from_json(path)
    G=json_graph.node_link_graph(data) 
-   draw_graph(G)
+   draw_graph(G,path_img,save)
    return True
   except Exception:
    return False 
 
 
-def draw_graph(G):
- pos= nx.spring_layout(G)
- 
+def draw_graph(G,path_img,save):
+
+ pos = nx.circular_layout(G)
+
  colors = nx.get_edge_attributes(G,'color').values()
  weights = nx.get_edge_attributes(G,'weight').values() 
  labels =  nx.get_edge_attributes(G,'label')
  color_node = nx.get_node_attributes(G,'color_node').values()
-
- nx.draw(G,pos,with_labels=True,#,
+ node_size = list(nx.get_node_attributes(G,'size').values())
+ 
+ nx.draw(G,pos=pos,with_labels=True,#,
            node_color=color_node,
-           edge_color=colors)
+           edge_color=colors,
+           node_size=node_size)
+    
+ nx.draw_networkx_edge_labels(G, pos=pos, edge_labels = labels)          
            
- nx.draw_networkx_edge_labels(G, pos, edge_labels = labels)          
-           
-           
- plt.show()	
+ if save == True:
+  #plt.tight_layout()
+    plt.savefig(path_img)
+    print('> graph saved at [' +str(path_img) +']')
+  #  plt.show()
+ else:
+  plt.show()  	
+ 
+ plt.close()
   
 def view_token_div(df,tk,list_index):
  print('TOKEN: ' +tk)
