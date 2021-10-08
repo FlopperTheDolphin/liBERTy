@@ -102,8 +102,8 @@ def view_higher_token(fram,tokens,token,time=None):
  network = pd.DataFrame(data=f,index=tokens,columns=[token])
  res = network.sort_values(by=token, ascending=False)
  res=res.iloc[:int(t),:]
- console.print(higher_token(t,token))
- console.print(res)
+ console.print(higher_token(t,token),highlight=False)
+ console.print(res,highlight=False)
  space()
  
  
@@ -161,7 +161,6 @@ def view_loaded_pos(path,path_img,save):
    data = load_from_json(path)
    G=json_graph.node_link_graph(data) 
    draw_graph(G,path_img,save)
-   print('wowowowowowowo')
    return True
   except Exception:
    return False 
@@ -193,7 +192,7 @@ def draw_graph(G,path_img,save):
  
  plt.close()
   
-def view_token_div(df,token,list_index):
+def view_token_div(df,token,list_index,A):
  console_show(TOKEN,token)
  space()
  
@@ -201,6 +200,7 @@ def view_token_div(df,token,list_index):
  df=df.sort_values(by='divergence',ascending=False) 
  max_v=df.iloc[0,0]
  j=1
+ 
  for i in range(len(list_index)): 
   x =255 - (df.loc[list_index[i]]*255)/max_v
    #(255,0/255,0)
@@ -214,7 +214,11 @@ def view_token_div(df,token,list_index):
  console.print(df.iloc[0:10,:],highlight=False)
  console.print(SEPARATOR) 
 
-  
+ #print(A)
+ #print(df)
+ view_matrix(A,True)
+ #plt.matshow(A)
+ #plt.show() 
 #def view_att_total(name,list_weight,tokens):
 # console=Console()
 # res=pd.DataFrame(data=list_weight,index=tokens,columns=['tokens']).sort_values(by='tokens',ascending=False)
@@ -271,3 +275,33 @@ def view_chosen_tokens(layer,head,tokens,dic_token):
    console.print(str(token),end=' ',highlight=False)
  space()  
  
+def view_dist(dist,l_index):
+ l_sort = sorted(dist.items(), key=lambda x: x[1])
+ max_v = l_sort[-1][1]
+ 
+ for element in l_sort:
+  console_show(element[0]+':',(element[1]/max_v),pick=False)
+  
+  
+def view_matrix(A,col=False):
+ figure = plt.figure()
+ axes = figure.add_subplot(111)
+ caxes = axes.matshow(A)
+ if col == True:
+  figure.colorbar(caxes)
+ plt.show()
+
+#def view_cluster(count,ind,l_index,bins):
+# ind = sorted(ind.items(), key=lambda x: x[1])
+ 
+# print(ind)
+ 
+# print()
+# print(count)
+# plt.hist(count)
+# plt.show()
+
+def view_interp(x_tokens,x_grid,y_token,y_grid):
+ plt.plot(x_tokens,y_token,'o',x_grid,y_grid,'-')
+ plt.show()
+  

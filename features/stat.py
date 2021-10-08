@@ -1,6 +1,6 @@
 import os
 from fun.vs_constants import *
-from feauters.utiliy import get_sentence
+from features.utiliy import get_sentence,get_bert_tokens
 from fun.loader import load_from_json,save_in_json
 from fun.view import console_show,view_token_div,view_chosen_heads,view_chosen_tokens
 from fun.comp_att import get_all_att_sentece,comp_divergence
@@ -9,10 +9,9 @@ def see_stat(name,out_dir,token,model_dir):
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
   dic_att=from_token_select_all_columns(out_dir,name,token)
   n_token = len(bert_tokens)
-  df,l=comp_divergence(dic_att,n_token)
-  view_token_div(df,token,l)
+  df,l,A=comp_divergence(dic_att,n_token)
+  view_token_div(df,token,l,A)
    
-
 def comp_stat(name,out_dir,perc,model_dir):
 
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
@@ -43,7 +42,7 @@ def get_sentence_and_bert_tokens(out_dir,name,model_dir):
 
 def select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx):
   dic_att = get_all_att_sentece(out_dir,name,token) 
-  df,l=comp_divergence(dic_att,n_token) 
+  df,l,A=comp_divergence(dic_att,n_token) 
   heads_chosen = list(df.loc[(df['divergence'] >= (int(mn)/100)) & (df['divergence'] <= (int(mx)/100))].index.values)
   console_show(MSG_HEAD_CHOSEN,heads_chosen)
   return heads_chosen,df,l
@@ -75,17 +74,6 @@ def get_dictionaries_and_length(tokens):
    n_token = len(tokens)
    return dic_head,dic_token,n_token
 
-def get_bert_tokens(mtx_dir,model_dir,sentence):
- bert_path =  max_path= os.path.join(mtx_dir,"bert_tokens.json")
- 
- if not os.path.exists(bert_path): 
-  tokenizer =  load_tokenizer(model_dir)
-  bert_tokens = comp_token(tokenizer,sentence)
-  save_in_json(bert_tokens,bert_path)
- else:
-  bert_tokens=load_from_json(bert_path)
-  
- return bert_tokens  
  
 def from_token_select_all_columns(out_dir,name,token):
  console_show(MSG_SENT,name)

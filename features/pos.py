@@ -1,5 +1,5 @@
 import os
-from feauters.utiliy import get_sentence,get_bert_and_spacy_tokens 
+from features.utiliy import get_sentence,get_bert_and_spacy_tokens 
 from fun.vs_constants import *
 from fun.loader import load_from_json,save_in_json,load_matrix
 from fun.view import console_show,view_loaded_pos,view_mtx_pos

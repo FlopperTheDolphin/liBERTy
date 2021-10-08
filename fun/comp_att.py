@@ -7,6 +7,7 @@ from fun.vs_constants import *
 #from fun.loader import *
 from scipy.special import kl_div
 from scipy.spatial.distance import jensenshannon
+from scipy.interpolate import interp1d
 
 def comp_matrix(tokenizer,model,sentence):
  e=tokenizer.encode(sentence, add_special_tokens=True)
@@ -198,17 +199,19 @@ def comp_divergence(dic_att,n_token):
  index_list=list()
  div_list=list()
  b_prob = np.array([1/n_token]*n_token)
+ A = np.zeros((12,12))
  df = pd.DataFrame(columns=['divergence','head'])
  for i in range(12):
   for j in range(12):
    index_list.append(str((i+1,j+1)))
    a_prob = np.array(dic_att[str((i+1,j+1))])
    div = jensenshannon(a_prob, b_prob)
+   A[(i,j)] = div
    div_list.append(div)
  
  df=pd.DataFrame(data=div_list,index=index_list,columns=['divergence'])    
   
- return df,index_list
+ return df,index_list,A
   
 def comp_token_weight(tokens,layer,head,name,out_dir):
   l=list()
@@ -217,4 +220,45 @@ def comp_token_weight(tokens,layer,head,name,out_dir):
    l.append(s)
    
   return l
+
+def get_all_matrix(out_dir,name):
+ dic_head = dict()
+ l_index = list()
+ for i in range(12):
+  for j in range(12):
+   mtx = load_matrix(out_dir,name,str(i+1),str(j+1))
+   head_index = str((i+1,j+1))
+   dic_head[head_index] = mtx
+   l_index.append(head_index)
+ return dic_head,l_index         
+
+def interp(out_dir,name,layer,head,token):
+ y = select_sub_matrix_for_token(out_dir,name,layer,head,token).to_numpy()
+ x = np.arange(0,len(y))
+ 
+ return interp1d(x,y,kind='quadratic'),len(y),x,y
+ 
+def get_grid(n_tokens,f):
+ x_grid = np.arange(0,n_tokens-1,0.1)     
+ y_grid = f(x_grid)
+ return x_grid,y_grid
+ 
+def find_max_interp(x_tokens,y_tokens):
+ points = list()
+ for i in range(len(x_tokens)):
+  points.append((x_tokens[i],y_tokens[i]))
+ 
+ print(points) 
+ token_max = sorted(points, key = lambda x: x[1])[-1]#points.sort(key=lambda x:x[1])
+ print(token_max)
+ return token_max,points
+ 
+ #la posizione non è altro che x-1
+ 
+ 
+#def get_smear(fdx,point_token):
+   
+   
+   
+ 
   

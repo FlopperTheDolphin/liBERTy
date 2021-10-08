@@ -1,9 +1,10 @@
 from configparser import ConfigParser
-from feauters.load import load
-from feauters.see_attention import see_attention_sentence
-from feauters.stat import see_stat,comp_stat,who
-from feauters.pos import see_pos  
-from feauters.utiliy import tokens
+from features.load import load
+from features.see_attention import see_attention_sentence,smear
+from features.stat import see_stat,comp_stat,who
+from features.pos import see_pos  
+from features.utiliy import tokens
+from features.distance import distance,cluster
 import sys
 import getopt
 
@@ -23,16 +24,28 @@ def read_config_file():
  sent_dir = parser.get("config", "sent_dir")
  return model_dir, out_dir, sent_dir
 
+
+def read_config_att(file_path,n):
+ parser = ConfigParser()
+ parser.read(file_path)
+ return parser.get("config",str(n))
+ 
+    
 def main():
 	
 ##PARSE 
  model_dir, out_dir, sent_dir = read_config_file() 
 
+ try:
+  name = read_config_att("config.txt","name")
+ except Exception:
+  name = None
+   
  main_option = sys.argv[1]
 
 
  argument_list = sys.argv[2:]
- options = "l:h:w:sct:f:i:n:p:"
+ options = "l:h:w:sct:f:i:n:p:r:"
  long_options = ["layer","head","word","sentence","time","class","file","id","name","perc"]
  
  try:
@@ -50,6 +63,7 @@ def main():
             sentence,sent_id = read_sentence(current_arg[1])
            elif current_arg[0] in ("-n","--name"):
             name= current_arg[1]
+               
           load(sentence,sent_id,name,model_dir, out_dir)
           #else:
            #print("> ERROR: require id sentence")
@@ -67,23 +81,25 @@ def main():
            head = current_arg[1]
           elif current_arg[0] in ("-w","--word"):
            word = current_arg[1]
-          elif current_arg[0] in ("-s","--sentence"):
-           sent = True 
-          elif current_arg[0] in ("-t","--time"):
+          #elif current_arg[0] in ("-s","--sentence","s"):
+           #sent = True 
+          elif current_arg[0] in ("-t","--time","t"):
            time = current_arg[1] 
-          elif current_arg[0] in ("-c","--class"):
-           cls = True
+          #elif current_arg[0] in ("-c","--class","c"):
+           #cls = True
           elif current_arg[0] in ("-n","--name"):
            name = current_arg[1] 
           else:
            print("> option not recognized")  
           
-                   
-         see_attention_sentence(name,layer,head,word,sent,cls,out_dir,model_dir,time)
+         see_attention_sentence(name,layer,head,word,True,True,out_dir,model_dir,time)
     
     elif main_option == "tokens":
-      if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
-       tokens(arguments[0][1],out_dir,model_dir)
+      #if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
+       #name = arguments[0][1]
+       
+      tokens(name,out_dir,model_dir)
+       
       #else:
       # print("> ERROR: require id sentence")
     
@@ -94,16 +110,17 @@ def main():
     
     elif main_option == "sentence":
      if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
-      sentence(out_dir,arguments[0][1])
+      name = arguments[0][1]
+     
+     sentence(out_dir,name)
       
     elif main_option == "stat":
-   
      for current_arg in arguments:
       if current_arg[0] in ("-t","--token"):
             token= current_arg[1]
       elif current_arg[0] in ("-n","--name"):
             name= current_arg[1]            
-            
+             
      see_stat(name,out_dir,token,model_dir)
      
     elif main_option== 'comp_stat':
@@ -112,11 +129,11 @@ def main():
             perc= current_arg[1]
        elif current_arg[0] in ("-n","--name"):
             name= current_arg[1]
-                              
+             
       comp_stat(name,out_dir,perc,model_dir)
      
     elif main_option == "pos":
-    
+        
         for current_arg in arguments:
  
           if current_arg[0] in ("-n","--name"):
@@ -127,7 +144,7 @@ def main():
            head = current_arg[1]
           else:
            print("> option not recognized")  
-        
+           
         see_pos(name,layer,head,out_dir,model_dir)
                           
    # elif main_option == "see_total":
@@ -156,7 +173,40 @@ def main():
            perc = current_arg[1] 
           else:
            print("> option not recognized")  
-       who(name,layer,head,perc,out_dir,model_dir)             
+       who(name,layer,head,perc,out_dir,model_dir)
+       
+    elif main_option == "dist":
+     for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+          name = current_arg[1] 
+        else:
+          print("> option not recognized")  
+        distance(name,out_dir)
+     
+    elif main_option == "cluster":
+     for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+          name = current_arg[1] 
+        elif current_arg[0] in ("-r","--centroids"):
+          n_centroid = current_arg[1] 
+        else:
+          print("> option not recognized")  
+     cluster(name,out_dir,model_dir,n_centroid)
+     
+    elif main_option == "smear":
+     for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+          name = current_arg[1] 
+        elif current_arg[0] in ("-t","--token"):
+          token = current_arg[1]
+        elif current_arg[0] in ("-l","--layer"):
+          layer = current_arg[1]
+        elif current_arg[0] in ("-h","--head"):
+          head = current_arg[1]    
+        else:
+          print("> option not recognized")  
+     smear(name,out_dir,model_dir,token,layer,head)
+       
     else:
        print("> no command here")        
  except getopt.error as err:

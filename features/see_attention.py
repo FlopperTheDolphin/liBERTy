@@ -1,9 +1,9 @@
 import os
 from fun.vs_constants import *
 from fun.loader import load_from_json
-from feauters.utiliy import get_sentence,get_bert_and_spacy_tokens
-from fun.comp_att import tokens_to_sentence,select_sub_matrix_for_token
-from fun.view import console_show,view_attention_gradient,view_top_tokens,view_higher_token
+from features.utiliy import get_sentence,get_bert_and_spacy_tokens
+from fun.comp_att import tokens_to_sentence,select_sub_matrix_for_token,interp,get_grid,find_max_interp
+from fun.view import console_show,view_attention_gradient,view_top_tokens,view_higher_token,view_interp
 
 def see_attention_sentence(name,layer,head,word,sent,cls,out_dir,model_dir,time=None):
 
@@ -39,4 +39,17 @@ def plot_gradient_attention(mtx_dir,fram,bert_tokens,token,layer,head):
   max_path= os.path.join(mtx_dir,"max.json")
   mx= load_from_json(max_path)
   view_attention_gradient(fram,bert_tokens,token,layer,head,mx)      
+
+def smear(name,out_dir,model_dir,token,head,layer):
+ f,n_tokens,x_tokens,y_att = interp(out_dir,name,layer,head,token)
+ token_max,points = find_max_interp(x_tokens,y_att)
+ 
+ 
+ 
+ x_grid,y_grid = get_grid(n_tokens,f)
+ view_interp(x_tokens,x_grid,y_att,y_grid)
+  
+   
+ 
+ 
 
