@@ -38,6 +38,10 @@ MSG_FILE_NOT_FOUND='File Not found, exec before command stat'
 MSG_CHOSEN_TOKEN_GIVEN_HEAD = 'Tokens with perc selected in head:'
 MSG_GRAPH_SAVED='Graph saved at:'
 SEPARATOR ='-------------------------------------------------------------------'
+MSG_WARNING_TIME = 'This could take more times...'
+MSG_TOTAL_STAT = 'Comp all stat for all tokens'
+PERC= 'Perc'
+MSG_COMP_AVG = 'Comp statistique ' 
 #Colors
 GREEN = 'rgb(0,255,0)'
 YELLOW = 'rgb(255,255,0)'
@@ -57,4 +61,5 @@ def msg_green(time,token):
  
 def higher_token(time,token):
  return str('first ' + str(time) + ' token with higher attention values for ' + token)
+
  

@@ -16,7 +16,7 @@ def comp_stat(name,out_dir,perc,model_dir):
 
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
   mn,mx,freq_path,mat_token_path=initialise_perc_and_define_paths(out_dir,name,perc)
-      
+  
   if not os.path.exists(freq_path) or not os.path.exists(mat_token_path):
     dic_head,dic_token,n_token=get_dictionaries_and_length(bert_tokens)
     for token in bert_tokens:
@@ -33,6 +33,48 @@ def comp_stat(name,out_dir,perc,model_dir):
   # infatti sono state prese in considerazione le head con una frequenza minore nel calcolo max di divergenze di shannon
   # purtroppo niente di nuovo, anzi le head hanno mostrato fenomeni di offset singolari in quelle head isolate
 
+def initialise_total_path(out_dir,name):
+ return os.path.join(os.path.join(out_dir,name),"total_freq.json")
+ 
+def total_stat(name,out_dir,model_dir):
+ sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
+ total_path = initialise_total_path(out_dir,name)
+ console_show(SEPARATOR,pick=False)
+ console_show(MSG_TOTAL_STAT)
+ console_show(MSG_WARNING_TIME)
+ console_show(SEPARATOR,pick=False)
+ 
+ if check_file_exists(total_path) == False:
+  dic_total = dict()
+  for token in bert_tokens:
+   console_show(TOKEN,token)
+   dic_att = get_all_att_sentece(out_dir,name,token) 
+   df,index_list,A = comp_divergence(dic_att,len(bert_tokens))
+   #print(df)
+   for index in index_list:
+    if index not in dic_total.keys():
+     dic_total[index] = list()  
+    dic_total[index].append(df['divergence'][index])
+   print(dic_total) 
+  save_to_json(dic_total,total_path)
+ else:
+  dic_total = load_from_json(total_path)
+  
+ console_show(SEPARATOR,pick=False)   
+ console_show(MSG_COMP_AVG) 
+ console_show(SEPARATOR,pick=False)
+ 
+ for index in dic_total.keys():
+  div = dic_total[index]
+  avg = np.mean(div)
+  std = np.std(div)
+  
+  dic_total[index] = (avg,std)
+ 
+ print(dic_total)
+ #view_total_stat(dic_total)
+ 
+ 
 
 def get_sentence_and_bert_tokens(out_dir,name,model_dir):
   sentence = get_sentence(out_dir,name)
@@ -46,6 +88,7 @@ def select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx):
   heads_chosen = list(df.loc[(df['divergence'] >= (int(mn)/100)) & (df['divergence'] <= (int(mx)/100))].index.values)
   console_show(MSG_HEAD_CHOSEN,heads_chosen)
   return heads_chosen,df,l
+        
   
 def create_file_freq_and_save(heads_chosen,dic_head,l,dic_token,token,freq_path,token_path):  
   for head in heads_chosen:
@@ -68,10 +111,10 @@ def initialise_perc_and_define_paths(out_dir,name,perc):
    mx_token_path=os.path.join(os.path.join(out_dir,name),"token_offset_"+str(perc)+".json")
    return mn,mx,freq_path,mx_token_path
 
-def get_dictionaries_and_length(tokens):
+def get_dictionaries_and_length(tokens,total):
    dic_head = dict() #lol
    dic_token = dict()
-   n_token = len(tokens)
+   n_token = len(tokens) 
    return dic_head,dic_token,n_token
 
  

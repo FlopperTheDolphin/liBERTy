@@ -1,7 +1,7 @@
 from configparser import ConfigParser
 from features.load import load
 from features.see_attention import see_attention_sentence,smear
-from features.stat import see_stat,comp_stat,who
+from features.stat import see_stat,comp_stat,who,total_stat
 from features.pos import see_pos  
 from features.utiliy import tokens
 from features.distance import distance,cluster
@@ -206,7 +206,12 @@ def main():
         else:
           print("> option not recognized")  
      smear(name,out_dir,model_dir,token,layer,head)
-       
+    
+    elif main_option == "total_stat":
+     if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
+      name = arguments[0][1]
+     total_stat(name,out_dir,model_dir) 
+      
     else:
        print("> no command here")        
  except getopt.error as err:
