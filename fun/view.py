@@ -318,4 +318,13 @@ def view_total_stat(dic_total,A,B,max_a,max_b):
  console_show(MSG_MAX_STD,max_b)
  view_mul_matrix([A,B],["Avg","Std"])
  
+def view_noop(dic_att,layer,head):
+ console_show(MSG_ORDERD_FOR_ATT)
+ sort_att = sorted(dic_att.items(), key=lambda x: x[1])
+ 
+ for t_token in sort_att:
+  console_show(TOKEN,str(t_token[0]) + ' ' + str(t_token[1]) )
+ 
+ return sort_att[-1][1]
+    
    

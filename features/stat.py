@@ -57,7 +57,7 @@ def total_stat(name,out_dir,model_dir):
      dic_total[index] = list()  
     dic_total[index].append(df['divergence'][index])
     
-  save_to_json(dic_total,total_path)
+  save_in_json(dic_total,total_path)
  else:
   dic_total = load_from_json(total_path)
   index_list = list()

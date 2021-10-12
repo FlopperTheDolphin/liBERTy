@@ -1,6 +1,6 @@
 from configparser import ConfigParser
 from features.load import load
-from features.see_attention import see_attention_sentence,smear
+from features.see_attention import see_attention_sentence,smear,noop_search,total_noop
 from features.stat import see_stat,comp_stat,who,total_stat
 from features.pos import see_pos  
 from features.utiliy import tokens
@@ -208,10 +208,28 @@ def main():
      smear(name,out_dir,model_dir,token,layer,head)
     
     elif main_option == "total_stat":
-     if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
-      name = arguments[0][1]
+     #if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
+      #name = arguments[0][1]
      total_stat(name,out_dir,model_dir) 
-      
+    
+    elif main_option == "noop":
+     for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+          name = current_arg[1] 
+        elif current_arg[0] in ("-l","--layer"):
+          layer = current_arg[1]
+        elif current_arg[0] in ("-h","--head"):
+          head = current_arg[1]
+     noop_search(name,out_dir,model_dir,layer,head) 
+    
+    elif main_option == "total_noop":
+     for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+          name = current_arg[1] 
+          
+     total_noop(name,out_dir,model_dir) 
+    
+    
     else:
        print("> no command here")        
  except getopt.error as err:

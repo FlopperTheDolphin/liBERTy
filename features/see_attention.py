@@ -1,9 +1,9 @@
 import os
 from fun.vs_constants import *
 from fun.loader import load_from_json
-from features.utiliy import get_sentence,get_bert_and_spacy_tokens
-from fun.comp_att import tokens_to_sentence,select_sub_matrix_for_token,interp,get_grid,find_max_interp
-from fun.view import console_show,view_attention_gradient,view_top_tokens,view_higher_token,view_interp
+from features.utiliy import get_sentence,get_bert_and_spacy_tokens,get_bert_tokens
+from fun.comp_att import tokens_to_sentence,select_sub_matrix_for_token,interp,get_grid,find_max_interp,get_head_matrix
+from fun.view import console_show,view_attention_gradient,view_top_tokens,view_higher_token,view_interp,view_noop,view_matrix
 
 def see_attention_sentence(name,layer,head,word,sent,cls,out_dir,model_dir,time=None):
 
@@ -48,8 +48,34 @@ def smear(name,out_dir,model_dir,token,head,layer):
  
  x_grid,y_grid = get_grid(n_tokens,f)
  view_interp(x_tokens,x_grid,y_att,y_grid)
+
   
    
+def noop_search(name,out_dir,model_dir,layer,head):
+ bert_tokens = initialise_noop(name,out_dir,model_dir)
+ noop_sel(out_dir,name,layer,head,bert_tokens)
+ 
+def noop_sel(out_dir,name,layer,head,bert_tokens):
+ dic_att = dict()
+ for token in bert_tokens:
+  dic_att[token] = select_sub_matrix_for_token(out_dir,name,layer,head,token).sum()
+ 
+ return view_noop(dic_att,layer,head)
  
  
 
+def initialise_noop(name,out_dir,model_dir):
+ console_show(MSG_SENT,name)
+ sentence = get_sentence(out_dir,name)
+ bert_tokens = get_bert_tokens(os.path.join(out_dir, name),model_dir,sentence) 
+ return bert_tokens
+      
+ 
+def total_noop(name,out_dir,model_dir):
+ bert_tokens = initialise_noop(name,out_dir,model_dir)
+ A = get_head_matrix()
+ for i in range(12):
+  for j in range(12):
+   A[(i,j)] = noop_sel(out_dir,name,str(i+1),str(j+1),bert_tokens)
+   
+ view_matrix(A,True)   
