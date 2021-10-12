@@ -72,10 +72,18 @@ def initialise_noop(name,out_dir,model_dir):
       
  
 def total_noop(name,out_dir,model_dir):
- bert_tokens = initialise_noop(name,out_dir,model_dir)
- A = get_head_matrix()
- for i in range(12):
-  for j in range(12):
-   A[(i,j)] = noop_sel(out_dir,name,str(i+1),str(j+1),bert_tokens)
-   
- view_matrix(A,True)   
+ path_att = os.path.join(os.path.join(out_dir, name),'att_max.json') 
+ if not os.path.exists(path_att):
+  bert_tokens = initialise_noop(name,out_dir,model_dir)
+  A = get_head_matrix()
+  for i in range(12):
+   for j in range(12):
+    A[(i,j)] = noop_sel(out_dir,name,str(i+1),str(j+1),bert_tokens)
+ 
+  save_in_json(A,path_att)
+ else:
+  A=load_from_json(path_att)
+     
+ view_matrix(A,True)
+ 
+    
