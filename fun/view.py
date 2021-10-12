@@ -286,10 +286,18 @@ def view_dist(dist,l_index):
 def view_matrix(A,col=False):
  figure = plt.figure()
  axes = figure.add_subplot(111)
- caxes = axes.matshow(A)
+ caxes = axes.matshow(A,extent=[1,12,12,1])
  if col == True:
   figure.colorbar(caxes)
  plt.show()
+ 
+def view_mul_matrix(arr,titles):
+ fig, axs = plt.subplots(nrows=1, ncols=len(arr))
+ for i in range(len(arr)):
+  caxes = axs[i].matshow(arr[i],extent=[1,12,12,1])
+  axs[i].set_title(titles[i])  
+ 
+ plt.show()   
 
 #def view_cluster(count,ind,l_index,bins):
 # ind = sorted(ind.items(), key=lambda x: x[1])
@@ -304,4 +312,10 @@ def view_matrix(A,col=False):
 def view_interp(x_tokens,x_grid,y_token,y_grid):
  plt.plot(x_tokens,y_token,'o',x_grid,y_grid,'-')
  plt.show()
-  
+
+def view_total_stat(dic_total,A,B,max_a,max_b):
+ console_show(MSG_MAX_AVG,max_a)
+ console_show(MSG_MAX_STD,max_b)
+ view_mul_matrix([A,B],["Avg","Std"])
+ 
+   

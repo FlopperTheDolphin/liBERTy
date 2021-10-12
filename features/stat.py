@@ -2,8 +2,8 @@ import os
 from fun.vs_constants import *
 from features.utiliy import get_sentence,get_bert_tokens
 from fun.loader import load_from_json,save_in_json
-from fun.view import console_show,view_token_div,view_chosen_heads,view_chosen_tokens
-from fun.comp_att import get_all_att_sentece,comp_divergence
+from fun.view import console_show,view_token_div,view_chosen_heads,view_chosen_tokens,view_total_stat
+from fun.comp_att import get_all_att_sentece,comp_divergence,comp_avg_and_std,update_matrix,get_head_matrix,get_max
 
 def see_stat(name,out_dir,token,model_dir):
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
@@ -39,12 +39,13 @@ def initialise_total_path(out_dir,name):
 def total_stat(name,out_dir,model_dir):
  sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
  total_path = initialise_total_path(out_dir,name)
- console_show(SEPARATOR,pick=False)
- console_show(MSG_TOTAL_STAT)
- console_show(MSG_WARNING_TIME)
- console_show(SEPARATOR,pick=False)
  
  if check_file_exists(total_path) == False:
+  console_show(SEPARATOR,pick=False)
+  console_show(MSG_TOTAL_STAT)
+  console_show(MSG_WARNING_TIME)
+  console_show(SEPARATOR,pick=False)
+  
   dic_total = dict()
   for token in bert_tokens:
    console_show(TOKEN,token)
@@ -55,26 +56,37 @@ def total_stat(name,out_dir,model_dir):
     if index not in dic_total.keys():
      dic_total[index] = list()  
     dic_total[index].append(df['divergence'][index])
-   print(dic_total) 
+    
   save_to_json(dic_total,total_path)
  else:
   dic_total = load_from_json(total_path)
-  
- console_show(SEPARATOR,pick=False)   
- console_show(MSG_COMP_AVG) 
- console_show(SEPARATOR,pick=False)
+  index_list = list()
+  for i in range(12):
+   for j in range(12):
+    index_list.append(str((i+1,j+1)))
+  A = get_head_matrix()  
  
+ B = A.copy()
+  
  for index in dic_total.keys():
   div = dic_total[index]
-  avg = np.mean(div)
-  std = np.std(div)
+  avg,std=comp_avg_and_std(div)
   
   dic_total[index] = (avg,std)
+  
+ #we recicle matrix A to another use here 
  
- print(dic_total)
- #view_total_stat(dic_total)
+ for i in range(12):
+  for j in range(12):
+   for index in index_list:
+    if str((i+1,j+1)) in index:
+     A = update_matrix(A,i,j,dic_total[index][0])
+     B = update_matrix(B,i,j,dic_total[index][1])
  
- 
+ max_a = get_max(A)
+ max_b = get_max(B)
+     
+ view_total_stat(dic_total,A,B,max_a,max_b)
 
 def get_sentence_and_bert_tokens(out_dir,name,model_dir):
   sentence = get_sentence(out_dir,name)
@@ -89,7 +101,6 @@ def select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx):
   console_show(MSG_HEAD_CHOSEN,heads_chosen)
   return heads_chosen,df,l
         
-  
 def create_file_freq_and_save(heads_chosen,dic_head,l,dic_token,token,freq_path,token_path):  
   for head in heads_chosen:
    if head in dic_head.keys():
@@ -111,7 +122,7 @@ def initialise_perc_and_define_paths(out_dir,name,perc):
    mx_token_path=os.path.join(os.path.join(out_dir,name),"token_offset_"+str(perc)+".json")
    return mn,mx,freq_path,mx_token_path
 
-def get_dictionaries_and_length(tokens,total):
+def get_dictionaries_and_length(tokens):
    dic_head = dict() #lol
    dic_token = dict()
    n_token = len(tokens) 

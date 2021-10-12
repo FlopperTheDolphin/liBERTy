@@ -199,7 +199,7 @@ def comp_divergence(dic_att,n_token):
  index_list=list()
  div_list=list()
  b_prob = np.array([1/n_token]*n_token)
- A = np.zeros((12,12))
+ A = get_head_matrix()
  df = pd.DataFrame(columns=['divergence','head'])
  for i in range(12):
   for j in range(12):
@@ -258,7 +258,15 @@ def find_max_interp(x_tokens,y_tokens):
  
 #def get_smear(fdx,point_token):
    
-   
-   
+def comp_avg_and_std(div):
+ return np.mean(div),np.std(div)   
  
-  
+def update_matrix(A,layer,head,a):
+   A[(layer,head)] = a
+   return A
+
+def get_head_matrix():
+ return np.zeros((12,12))
+
+def get_max(A):
+ return np.amax(A)   
