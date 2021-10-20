@@ -71,7 +71,8 @@ def view_attention_gradient(fram,tokens,token,layer,head,mx):
  network = fram
  max_val = network.sort_values(ascending=False).iloc[0]
   
-   
+ pd.set_option("display.max_rows", None, "display.max_columns", None)  
+
   #visualize for each token in keys 
  m = mx[str((int(layer),int(head)))]
  console_show(MSG_MAX_MTX,m)
@@ -309,8 +310,8 @@ def view_mul_matrix(arr,titles):
 # plt.hist(count)
 # plt.show()
 
-def view_interp(x_tokens,x_grid,y_token,y_grid):
- plt.plot(x_tokens,y_token,'o',x_grid,y_grid,'-')
+def view_interp(x,y,x_l,y_nm):
+ plt.plot(x_l,y_nm,'o',x,y,'-')
  plt.show()
 
 def view_total_stat(dic_total,A,B,max_a,max_b):
@@ -325,6 +326,52 @@ def view_noop(dic_att,layer,head):
  for t_token in sort_att:
   console_show(TOKEN,str(t_token[0]) + ' ' + str(t_token[1]) )
  
- return sort_att[-1][1]
+ return sort_att[-1]
     
-   
+def view_total_noop(dic_att,A,n_tokens):
+  l_t=list()
+  for t in dic_att.values():
+    l_t.append(t[1])
+    
+  res=pd.DataFrame(data=dic_att.values(),index=dic_att.keys(),columns=['token','max_att_sum']).sort_values(by='max_att_sum',ascending=False)
+  
+  pd.set_option("display.max_rows", None, "display.max_columns", None)
+  
+  B = A.copy()
+  
+  #console_show(SEPARATOR,pick=False)
+  #console_show(MSG_ORDER_ATT_SUM)
+  #console_show(res,pick=False)
+  #console_show(SEPARATOR,pick=False)
+  
+  cls = res.loc[res['token'] == "[CLS]"]
+  sep =res.loc[res['token'] == "[SEP]"]
+  
+ # noop_cls=cls.loc[(cls['max_att_sum'] == n_tokens) | (cls['max_att_sum'] > (n_tokens - 20))]
+ # noop_sep=sep.loc[(sep['max_att_sum'] == n_tokens) | (sep['max_att_sum'] > (n_tokens - 20))]
+  
+  for i in range(12):
+   for j in range(12):
+    if str((i+1,j+1)) in list(cls.index):
+     B[(i,j)] = 1
+    elif str((i+1,j+1)) in list(sep.index):
+     B[(i,j)] = -1
+    else:
+     B[(i,j)] = 0
+         
+  console_show(MSG_MAX_VALUE,n_tokens)
+         
+  console_show(SEPARATOR,pick=False)
+  console_show(MSG_POSSIBLE_NOOP)
+  print(res.iloc[1:5])
+  console_show(SEPARATOR,pick=False)
+  
+  console_show(SEPARATOR,pick=False)
+  console_show(MSG_NO_NOOP)
+  print(res.loc[(res['token'] != "[CLS]") & (res['token'] != "[SEP]")])
+  console_show(SEPARATOR,pick=False)
+  
+  view_mul_matrix([A,B],["max_att","noops"])   
+  
+def view_smear():
+ return  

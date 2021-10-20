@@ -11,7 +11,15 @@ def see_stat(name,out_dir,token,model_dir):
   n_token = len(bert_tokens)
   df,l,A=comp_divergence(dic_att,n_token)
   view_token_div(df,token,l,A)
-   
+
+
+def see_noop(name,out_dir,token,model_dir):
+ sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
+ dic_att=from_token_select_all_columns(out_dir,name,token)
+ n_token = len(bert_tokens)
+ df,l,A=comp_divergence(dic_att,n_token,vec='find_cls')
+ view_token_div(df,token,l,A)
+
 def comp_stat(name,out_dir,perc,model_dir):
 
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
@@ -36,7 +44,7 @@ def comp_stat(name,out_dir,perc,model_dir):
 def initialise_total_path(out_dir,name):
  return os.path.join(os.path.join(out_dir,name),"total_freq.json")
  
-def total_stat(name,out_dir,model_dir):
+def total_stat(name,out_dir,model_dir,view=True):
  sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
  total_path = initialise_total_path(out_dir,name)
  
@@ -86,7 +94,10 @@ def total_stat(name,out_dir,model_dir):
  max_a = get_max(A)
  max_b = get_max(B)
      
- view_total_stat(dic_total,A,B,max_a,max_b)
+ if view == True:    
+  view_total_stat(dic_total,A,B,max_a,max_b)
+ 
+ return dic_total,index_list
 
 def get_sentence_and_bert_tokens(out_dir,name,model_dir):
   sentence = get_sentence(out_dir,name)
@@ -154,4 +165,9 @@ def check_file_exists(token_path):
 def create_token_path_file(out_dir,name):
  mtx_dir = os.path.join(out_dir, name)
  return mtx_dir  
+
+
+def compare():
+ return 
+ 
 

@@ -1,9 +1,9 @@
 from configparser import ConfigParser
 from features.load import load
 from features.see_attention import see_attention_sentence,smear,noop_search,total_noop
-from features.stat import see_stat,comp_stat,who,total_stat
+from features.stat import see_stat,comp_stat,who,total_stat,see_noop,compare
 from features.pos import see_pos  
-from features.utiliy import tokens
+from features.utiliy import tokens,get_sentence
 from features.distance import distance,cluster
 import sys
 import getopt
@@ -112,16 +112,24 @@ def main():
      if arguments[0][0] != None and arguments[0][0] in ("-n","--name"):
       name = arguments[0][1]
      
-     sentence(out_dir,name)
+     print(get_sentence(out_dir,name))
       
     elif main_option == "stat":
+    
      for current_arg in arguments:
       if current_arg[0] in ("-t","--token"):
             token= current_arg[1]
       elif current_arg[0] in ("-n","--name"):
-            name= current_arg[1]            
-             
+            name= current_arg[1]                            
      see_stat(name,out_dir,token,model_dir)
+     
+    elif main_option == "find_noop":
+      for current_arg in arguments:
+       if current_arg[0] in ("-t","--token"):
+            token= current_arg[1]
+       elif current_arg[0] in ("-n","--name"):
+            name= current_arg[1]                   
+      see_noop(name,out_dir,token,model_dir)
      
     elif main_option== 'comp_stat':
       for current_arg in arguments:
@@ -228,6 +236,14 @@ def main():
           name = current_arg[1] 
           
      total_noop(name,out_dir,model_dir) 
+    
+    
+    elif main_option == "compare":
+     for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+          name = current_arg[1] 
+          
+     compare(name,out_dir,model_dir) 
     
     
     else:
