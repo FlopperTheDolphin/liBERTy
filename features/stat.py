@@ -10,11 +10,13 @@ def see_stat(name,out_dir,token,model_dir,vector,id_token):
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
   dic_att=from_token_select_all_columns(out_dir,name,token,id_token)
   n_token = len(bert_tokens)
-  if vector == None:
+  if vector == None or vector== 'entropy':
    df,l,A=comp_divergence(dic_att,n_token,bert_tokens)
+   view_token_div(df,token,l,A,id_token)
   elif vector == 'noop':
    weight = ['[CLS]','[SEP]','.']
    df,l,A=comp_divergence(dic_att,n_token,bert_tokens,weight)
+   view_token_div(df,token,l,A,id_token)
   elif vector == 'all':
   #for now we have only two vectros so we use cartesian plot
    console_show(MSG_COMPARE)
@@ -24,10 +26,7 @@ def see_stat(name,out_dir,token,model_dir,vector,id_token):
    df2,l2,A2=comp_divergence(dic_att,n_token,bert_tokens)
    console_show(MSG_DONE_2)
    view_cartesian_div(df1,df2,l1,id_token,token)
-   return
    
-  view_token_div(df,token,l,A,id_token)
-
 
 def see_noop(name,out_dir,token,model_dir):
  sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
@@ -36,17 +35,21 @@ def see_noop(name,out_dir,token,model_dir):
  df,l,A=comp_divergence(dic_att,n_token,vec='find_cls')
  view_token_div(df,token,l,A)
 
-def comp_stat(name,out_dir,perc,model_dir):
+def comp_stat(name,out_dir,perc,model_dir,vector='entropy'):
 
   sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
   mn,mx,freq_path,mat_token_path=initialise_perc_and_define_paths(out_dir,name,perc)
   
   if not os.path.exists(freq_path) or not os.path.exists(mat_token_path):
+    un_tokens = list(set(bert_tokens))
     dic_head,dic_token,n_token=get_dictionaries_and_length(bert_tokens)
-    for token in bert_tokens:
+    for token in un_tokens:
      console_show(TOKEN,token)
-     heads_chosen,df,l = select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx)
-     dic_head,dic_token=create_file_freq_and_save(heads_chosen,dic_head,l,dic_token,token,freq_path,mat_token_path)
+     possible_id = find(sentence,bert_tokens,token,view=False)
+     for id_token in possible_id:
+      print(ID_TOKEN,id_token)
+      heads_chosen,df = select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx,id_token,bert_tokens,vector)
+      dic_head,dic_token=create_file_freq_and_save(heads_chosen,dic_head,dic_token,token,freq_path,mat_token_path)
   else:
     dic_token = load_from_json(mat_token_path)
     dic_head = load_from_json(freq_path)
@@ -57,12 +60,12 @@ def comp_stat(name,out_dir,perc,model_dir):
   # infatti sono state prese in considerazione le head con una frequenza minore nel calcolo max di divergenze di shannon
   # purtroppo niente di nuovo, anzi le head hanno mostrato fenomeni di offset singolari in quelle head isolate
 
-def initialise_total_path(out_dir,name):
- return os.path.join(os.path.join(out_dir,name),"total_freq.json")
+def initialise_total_path(out_dir,name,vector):
+ return os.path.join(os.path.join(out_dir,name),"total_freq_"+vector+".json")
  
 def total_stat(name,out_dir,model_dir,vector,view=True):
  sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
- total_path = initialise_total_path(out_dir,name)
+ total_path = initialise_total_path(out_dir,name,vector)
  
  if check_file_exists(total_path) == False:
   console_show(SEPARATOR,pick=False)
@@ -78,6 +81,7 @@ def total_stat(name,out_dir,model_dir,vector,view=True):
    possible_id = find(sentence,bert_tokens,token,view=False)
    
    for id_token in possible_id:
+    console_show(ID_TOKEN,id_token)
     dic_att = get_all_att_sentece(out_dir,name,token,id_token)
     if vector == None or vector == 'entropy':
      df,index_list,A=comp_divergence(dic_att,len(bert_tokens),bert_tokens)
@@ -132,14 +136,20 @@ def get_sentence_and_bert_tokens(out_dir,name,model_dir):
   bert_tokens=get_bert_tokens(mtx_dir,model_dir,sentence)
   return sentence,bert_tokens
 
-def select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx):
-  dic_att = get_all_att_sentece(out_dir,name,token) 
-  df,l,A=comp_divergence(dic_att,n_token) 
+def select_head_by_mn_mx(out_dir,name,token,n_token,mn,mx,id_token,bert_tokens,vector='entropy'):
+  dic_att = get_all_att_sentece(out_dir,name,token,id_token)
+
+  if vector == None or vector == 'entropy':
+     df,index_list,A=comp_divergence(dic_att,len(bert_tokens),bert_tokens)
+  elif vector == 'noop':
+     weight = ['[CLS]','[SEP]','.']
+     df,index_list,A=comp_divergence(dic_att,len(bert_tokens),bert_tokens,weight)
+     
   heads_chosen = list(df.loc[(df['divergence'] >= (int(mn)/100)) & (df['divergence'] <= (int(mx)/100))].index.values)
   console_show(MSG_HEAD_CHOSEN,heads_chosen)
-  return heads_chosen,df,l
+  return heads_chosen,df
         
-def create_file_freq_and_save(heads_chosen,dic_head,l,dic_token,token,freq_path,token_path):  
+def create_file_freq_and_save(heads_chosen,dic_head,dic_token,token,freq_path,token_path):  
   for head in heads_chosen:
    if head in dic_head.keys():
     dic_head[head] = dic_head[head] + 1

@@ -28,10 +28,12 @@ def get_bert_and_spacy_tokens(model_dir,sentence,mtx_dir):
  return bert_tokens,spacy_tokens 
 
 
-def tokens(name,out_dir,model_dir):
+def tokens(name,out_dir,model_dir,view=True):
  sentence = get_sentence(out_dir,name)
  bert_tokens = get_bert_tokens(os.path.join(out_dir,name),model_dir,sentence)
- console_show('',bert_tokens,pick=False)
+ if view==True:
+  console_show('',bert_tokens,pick=False)
+ return bert_tokens
 
 
 def sentence(out_dir,name):

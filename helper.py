@@ -5,7 +5,7 @@ def help(command):
  elif command == 'see':
   return "see [-l | --layer = <layer>] [-h | --head = <head>] [-w | --word = <word>] [-n | --name] [-t | --time = <time>] - show most weighted token given a word: sentence = change style of visualisation, time = select how many tokens correlated find"
  elif command == 'stat':
-  return "stat [-t | --token = <token to visualise>] [-n | --name = <name of the sentence>] [-p | --perc = <div value>] [-v | --vector = <vector used for shannon>] [-i | --id = <number of token>] - print all the Shannon distance from a spaecified token for all the matrix from a specified vector, if there's perc print all the Shannon distance from a specified token from matrix with value x in range --perc < x < --perc+10, you can also define which vectore use among: entropy and noop. If token == 'all' plot statistic values"
+  return "stat [-t | --token = <token to visualise>] {-n | --name = <name of the sentence>} {-p | --perc = <div value>} [-v | --vector = <vector used for shannon>] {-i | --id = <number of token>} - print all the Shannon distance from a specified token for all the matrix from a specified vector,\n * if perc != None print all the Shannon distance from a specified token from matrix with value x in range --perc < x < --perc+10,\n * define which vectore use among: entropy and noop.\n * If token == all plot statistic values \n * if vector == all print cartesian plot for vector entropy and noop"
  elif command == 'who':
   return "who [-l | --layer = <layer>] [-h | --head = <head>] [-n | --name = <name of sentence>] [-p | --perc = <div value>] - find matrix which has div value x such that: --perc < x < --perc+10, for a specified token"
  elif command == 'cluster':

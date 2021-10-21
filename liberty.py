@@ -112,11 +112,10 @@ def main():
     elif main_option == "stat":
      token=None
      perc=None
-     total = False
      vector = None
      id_token=0
      color=0
-     total = True
+     
      for current_arg in arguments:
        if current_arg[0] in ("-t","--token"):
             token= current_arg[1]
@@ -124,7 +123,6 @@ def main():
             name= current_arg[1]
        elif current_arg[0] in ("-p","--perc"):
             perc= current_arg[1]
-            total=True
        elif current_arg[0] in ("-v","--vector"):
             vector= current_arg[1]     
        elif current_arg[0] in ("-i","--id"):
@@ -134,11 +132,7 @@ def main():
       from features.stat import total_stat
       total_stat(name,out_dir,model_dir,vector)
       sys.exit()
-                        
-     if token==None or (total == True and perc==None) or ((token != None or vector !=None) and total == True):
-      print(help('stat'))      
-      sys.exit()
-     if total == False:
+     elif token != None and perc == None:                   
       try:       
        from features.stat import see_stat
        see_stat(name,out_dir,token,model_dir,vector,id_token)
@@ -146,12 +140,16 @@ def main():
        from features.utiliy import tokens 
        from features.utiliy import find
        from features.utiliy import get_sentence
-       bert_tokens = tokens(name,out_dir,model_dir)       
+       bert_tokens = tokens(name,out_dir,model_dir,view=False)       
        sentence = get_sentence(out_dir,name)     
        find(sentence,bert_tokens,token)
-     else:
+     elif perc != None: 
       from features.stat import comp_stat       
-      comp_stat(name,out_dir,perc,model_dir)
+      comp_stat(name,out_dir,perc,model_dir,vector)
+     else: 
+      print(help('stat'))      
+      sys.exit()
+     
        
     elif main_option == "pos":
        layer=None
@@ -264,7 +262,7 @@ def main():
      from features.utiliy import tokens 
      from features.utiliy import find
      from features.utiliy import get_sentence
-     bert_tokens = tokens(name,out_dir,model_dir)       
+     bert_tokens = tokens(name,out_dir,model_dir,view=False)       
      sentence = get_sentence(out_dir,name)     
      find(sentence,bert_tokens,token)
     

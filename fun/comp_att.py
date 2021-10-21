@@ -40,15 +40,17 @@ def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
    ha='##'
     
  j=1
- token = token+'.'+str(j)
+ t = ''+token
+ token = t+'.'+str(j)
  while(sel):
   try:
    frams.append(mtx[token])
    j=j+1
-   token = token[:-1]+str(j)
+   token = t+'.'+str(j)
+   print('preso ' + token)
   except Exception:
    sel=False
- 
+
  return frams,j,ha
 
 def update_token(j,has,token):

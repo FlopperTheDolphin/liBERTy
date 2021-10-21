@@ -56,6 +56,7 @@ MSG_DONE_2='Second Metric comp done'
 JSD_COMP = 'JSD comparison for token:'
 MSG_POSSIBLE_INDEX='Possible id for token:'
 MSG_NO_INDEX="There's only one token"
+ID_TOKEN='id token:'
 #Colors
 GREEN = 'rgb(0,255,0)'
 YELLOW = 'rgb(255,255,0)'
