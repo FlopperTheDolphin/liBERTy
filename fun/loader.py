@@ -1,8 +1,8 @@
 import sys
 import os
 import json
-import xml.etree.ElementTree as ET
-import requests
+#import xml.etree.ElementTree as ET
+#import requests
 import pandas as pd
 from os import listdir
 from fun.vs_constants import * 
@@ -65,6 +65,7 @@ def load_tokenizer(bert_path):
  return AutoTokenizer.from_pretrained(bert_path)
   
 def load_from_json(path_file):
+ 
  f = open(path_file,'r')
  data = json.load(f)
  f.close()

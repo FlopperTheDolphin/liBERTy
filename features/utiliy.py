@@ -1,16 +1,18 @@
 import os
-import spacy
+#import spacy
 from fun.vs_constants import *
 from fun.loader import load_from_json,save_in_json
-from fun.view import console_show
+from fun.view import console_show,view_find
 from fun.loader import load_tokenizer
 from fun.comp_att import comp_token
 
 def get_sentence(out_dir,name):
+ 
  dic_sent = load_from_json(os.path.join(os.path.join(out_dir, name),'sentence.json'))
  return dic_sent['sentence']
 
 def get_bert_and_spacy_tokens(model_dir,sentence,mtx_dir):
+ import spacy
  console_show(MSG_TOKENS_COMP)
  
  bert_tokens = get_bert_tokens(mtx_dir,model_dir,sentence)
@@ -48,3 +50,22 @@ def get_bert_tokens(mtx_dir,model_dir,sentence):
   
  return bert_tokens  
  
+def find(sentence,bert_tokens,token,view=True):
+  possible_index=list()
+  j=0
+  for tk in bert_tokens:
+   if tk == token:
+    possible_index.append(j)
+    j=j+1
+      
+  if view== True:
+   view_find(bert_tokens,token,possible_index)
+   
+  return possible_index  
+   
+  
+   
+  
+  
+   
+  

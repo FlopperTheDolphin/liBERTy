@@ -64,24 +64,29 @@ def view_top_tokens(fram,tokens,token,time):
  space()
  space()
  
-def view_attention_gradient(fram,tokens,token,layer,head,mx):
+def view_attention_gradient(fram,tokens,token,layer,head,mx,id_token):
 
  console = Console()
  dic_perc = dict()
  network = fram
  max_val = network.sort_values(ascending=False).iloc[0]
-  
- pd.set_option("display.max_rows", None, "display.max_columns", None)  
 
   #visualize for each token in keys 
  m = mx[str((int(layer),int(head)))]
  console_show(MSG_MAX_MTX,m)
  space()
- 
+ no_underline = False
  for i in range(len(tokens)):
   if tokens[i] == token:
-   x =255 - (network.iloc[i]*255)/max_val
-   console.print("[underline]"+token,style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
+   if id_token == 0 and no_underline == False:
+    x =255 - (network.iloc[i]*255)/max_val
+    console.print("[underline]"+token,style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False)
+    no_underline = True
+   else:
+    id_token=id_token-1
+    x =255 - (network.iloc[i]*255)/max_val
+   #(255,0/255,0)
+    console.print(str(tokens[i]),style="rgb(255,"+str(int(x))+",255)",end=' ', highlight=False) 
   else:
    x =255 - (network.iloc[i]*255)/max_val
    #(255,0/255,0)
@@ -193,7 +198,7 @@ def draw_graph(G,path_img,save):
  
  plt.close()
   
-def view_token_div(df,token,list_index,A):
+def view_token_div(df,token,list_index,A,id_token):
  console_show(TOKEN,token)
  space()
  
@@ -210,6 +215,7 @@ def view_token_div(df,token,list_index,A):
    space()
    
  space()
+ console_show(MSG_TOKEN_ID,id_token,False)
  console.print(SEPARATOR)  
  console_show(MSG_FIRST_DIV_MTX,token,False) 
  console.print(df.iloc[0:10,:],highlight=False)
@@ -314,10 +320,32 @@ def view_interp(x,y,x_l,y_nm):
  plt.plot(x_l,y_nm,'o',x,y,'-')
  plt.show()
 
-def view_total_stat(dic_total,A,B,max_a,max_b):
- console_show(MSG_MAX_AVG,max_a)
- console_show(MSG_MAX_STD,max_b)
- view_mul_matrix([A,B],["Avg","Std"])
+def view_total_stat(dic):
+ df = pd.DataFrame.from_dict(dic)
+ index_list = list(dic.keys())
+ print(df)
+ boxplot = df.boxplot()
+ plt.show()
+ #l = list()
+ #j=0
+ #fig, axs = plt.subplots(4)
+ #for i in range(144):
+  #l.append(index_list.pop(0))
+   
+  
+  #if len(l) == 12:
+  # fig = plt.figure(j)  
+  # l = list()
+  # j=j+1
+ 
+ #plt.show()   
+   
+ 
+ 
+ plt.show()
+ #console_show(MSG_MAX_AVG,max_a)
+ #console_show(MSG_MAX_STD,max_b)
+ #view_mul_matrix([A,B],["Avg","Std"])
  
 def view_noop(dic_att,layer,head):
  console_show(MSG_ORDERD_FOR_ATT)
@@ -372,6 +400,49 @@ def view_total_noop(dic_att,A,n_tokens):
   console_show(SEPARATOR,pick=False)
   
   view_mul_matrix([A,B],["max_att","noops"])   
+
+
+def console_show_color_red(msg):
+ console = Console()
+ console.print(msg,style=RED,end=' ', highlight=False)
+ 
+def console_show_color_black(msg):
+ console = Console()
+ console.print(msg,end=' ', highlight=False)
+
   
 def view_smear():
  return  
+ 
+ 
+def view_cartesian_div(df1,df2,index_list,id_token,token,x_label='entropy',y_label='noop'):
+ x = df1['divergence'].to_list()
+ y = df2['divergence'].to_list()
+ plt.scatter(x, y)
+ plt.title(JSD_COMP + ' ' + str(token) + ' number: ' + str(id_token))
+ plt.xlabel(x_label)
+ plt.ylabel(y_label)
+ for i in range(len(x)):
+  
+  if i >= 132:
+   plt.scatter(x[i],y[i],c='coral') 
+  plt.annotate(index_list[i], (x[i], y[i]))
+ plt.show()
+ 
+  
+def view_find(bert_tokens,token,possible_index):
+  for tk in bert_tokens:
+   if tk == token:
+    console_show_color_red(tk)
+   else:
+    console_show_color_black(tk) 
+  space()
+  if len(possible_index) > 1:
+   console_show(MSG_POSSIBLE_INDEX)
+   for index in possible_index:
+    console_show('',index)
+  else:
+   console_show(MSG_NO_INDEX)
+ 
+   
+ 

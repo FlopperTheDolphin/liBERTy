@@ -49,6 +49,13 @@ MSG_ORDER_ATT_SUM = 'Head sorted by max attention sum'
 MSG_POSSIBLE_NOOP='Possible noop:'
 MSG_NO_NOOP = 'No noop:'
 MSG_MAX_VALUE = 'Max attention values possible:'
+MSG_TOKEN_ID='Token id: '
+MSG_COMPARE='Compare two different metrics'
+MSG_DONE_1='First Metric comp done'
+MSG_DONE_2='Second Metric comp done'
+JSD_COMP = 'JSD comparison for token:'
+MSG_POSSIBLE_INDEX='Possible id for token:'
+MSG_NO_INDEX="There's only one token"
 #Colors
 GREEN = 'rgb(0,255,0)'
 YELLOW = 'rgb(255,255,0)'

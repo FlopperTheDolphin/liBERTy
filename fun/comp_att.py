@@ -4,11 +4,9 @@ import numpy as np
 import pandas as pd
 from fun.loader import load_matrix,save_in_json,load_from_json
 from fun.vs_constants import *
-#from fun.loader import *
 from scipy.special import kl_div
 from scipy.spatial.distance import jensenshannon
 from scipy.interpolate import interp1d
-#from scipy.signal import gauss_spline
 from scipy.stats import norm
 
 def comp_matrix(tokenizer,model,sentence):
@@ -19,17 +17,17 @@ def comp_matrix(tokenizer,model,sentence):
  return attentions,tokens
  
 
-def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
- mtx = load_matrix(out_dir,id_sent,layer,head)
- try:
-  fram = mtx[token]
- except Exception:
-  fram = mtx['##'+token] 
+#def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
+ #mtx = load_matrix(out_dir,id_sent,layer,head)
+ #try:
+  #fram = mtx[token]
+ #except Exception:
+  #fram = mtx['##'+token] 
  
- return fram
+ #return fram
 
 
-def select_columns_for_token(out_dir,id_sent,layer,head,token):
+def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
  mtx = load_matrix(out_dir,id_sent,layer,head)
  sel=True
  ha = ''
@@ -219,25 +217,32 @@ def get_pos_mtx(att_mtx,dic_tokens,tokens):
 def get_att_max(att_mtx):
  return att_mtx.max().max()
     
-def get_all_att_sentece(out_dir,sent_id,token):
+def get_all_att_sentece(out_dir,sent_id,token,id_token=0):
  l = dict()
  for i in range(12):
   for j in range(12):
-   l[str((i+1,j+1))] = select_sub_matrix_for_token(out_dir,sent_id,str(i+1),str(j+1),token)
+   frams,k,has = select_sub_matrix_for_token(out_dir,sent_id,str(i+1),str(j+1),token)
+   l[str((i+1,j+1))] = frams[int(id_token)]
  return l  
  
-def comp_divergence(dic_att,n_token,vec='min_entropy'):
+def comp_divergence(dic_att,n_token,bert_tokens,weight='all'):
  # find for all attentions Series given a token, the divergence distance from
  # an average probability. 
  index_list=list()
  div_list=list()
- if vec == 'min_entropy':
+ if weight == 'all':
   b_prob = np.array([1/n_token]*n_token)
- elif vec == 'find_cls':
+ else:
+  j=0
+  for i in range(n_token):
+   if bert_tokens[i] in weight: 
+     j=j+1
+     
+  w = 1/j
   b_prob = np.array([0]*n_token,dtype=float)
-  b_prob[0] = float(1)
- # b_prob[-1] = float(1)
-  print(b_prob)
+  for i in range(n_token):
+   if bert_tokens[i] in weight:
+    b_prob[i] = w
  
  A = get_head_matrix()
  df = pd.DataFrame(columns=['divergence','head'])
