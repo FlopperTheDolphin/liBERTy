@@ -324,6 +324,7 @@ def view_total_stat(dic):
  df = pd.DataFrame.from_dict(dic)
  index_list = list(dic.keys())
  print(df)
+# df =  df['(1, 1)','(1, 2)','(1, 3)','(1, 4)','(1, 5)','(1, 6)','(1, 7)','(1, 8)','(1, 9)','(1, 10)','(1, 11)','(1, 12)']
  boxplot = df.boxplot()
  plt.show()
  #l = list()
@@ -437,12 +438,28 @@ def view_find(bert_tokens,token,possible_index):
    else:
     console_show_color_black(tk) 
   space()
-  if len(possible_index) > 1:
+  if len(possible_index) == 0:
+   console_show(MSG_NO_TOKEN)
+  elif len(possible_index) > 1:
    console_show(MSG_POSSIBLE_INDEX)
    for index in possible_index:
     console_show('',index)
   else:
    console_show(MSG_NO_INDEX)
  
-   
+def view_outlier(df):
+ console = Console()
+ console_show(MSG_MAX_OUTLIER,pick=False)
+ console_show(SEPARATOR,pick=False)
+ console.print(df.iloc[:10,:],highlight=False)
+ console_show(SEPARATOR,pick=False)
+
  
+def view_total_outlier(dic_diff,bert_tokens,index_list):
+ sort = sorted(dic_diff.items(), key=lambda x: x[1][1])
+ for i in range(len(sort)):
+  sort[i] = (sort[i][0],) + sort[i][1]
+ pd.set_option("display.max_rows", None, "display.max_columns", None) 
+ network = pd.DataFrame(data=sort,columns=['index','token','diff_att'])  
+ 
+ print(network)

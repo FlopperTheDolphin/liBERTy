@@ -52,13 +52,16 @@ def get_bert_tokens(mtx_dir,model_dir,sentence):
   
  return bert_tokens  
  
-def find(sentence,bert_tokens,token,view=True):
+def find(sentence,bert_tokens,token,view=True,repeat=True):
   possible_index=list()
   j=0
   for tk in bert_tokens:
    if tk == token:
     possible_index.append(j)
     j=j+1
+    
+  if len(possible_index) == 0 and repeat == True:
+   return find(sentence,bert_tokens,'##' + token,view,False)  
       
   if view== True:
    view_find(bert_tokens,token,possible_index)

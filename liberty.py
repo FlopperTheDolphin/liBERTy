@@ -98,6 +98,7 @@ def main():
       name = arguments[0][1]
      from features.utiliy import tokens 
      tokens(name,out_dir,model_dir)
+    
        
       #else:
       # print("> ERROR: require id sentence")
@@ -114,7 +115,6 @@ def main():
      perc=None
      vector = None
      id_token=0
-     color=0
      
      for current_arg in arguments:
        if current_arg[0] in ("-t","--token"):
@@ -149,11 +149,39 @@ def main():
      else: 
       print(help('stat'))      
       sys.exit()
-     
-       
-    elif main_option == "pos":
+    
+    
+    elif main_option == "outlier":
        layer=None
        head = None 
+       vector= None
+       for current_arg in arguments:
+        if current_arg[0] in ("-n","--name"):
+         name = current_arg[1]
+        elif current_arg[0] in ("-l","--layer"):
+         layer= current_arg[1]
+        elif current_arg[0] in ("-h","--head"):
+         head = current_arg[1]
+        elif current_arg[0] in ("-v","--vector"):
+         vector = current_arg[1]   
+        else:
+         print("> option not recognized")
+         
+       if (layer=='all' or head == 'all') and vector != None:
+        from features.stat import total_outlier
+        total_outlier(name,out_dir,model_dir,vector)
+        sys.exit()
+          
+       if layer == None or head == None or vector == None:
+        print(help('outlier'))
+        sys.exit()        
+       from features.stat import outlier     
+       outlier(name,layer,head,out_dir,model_dir,vector) 
+           
+        
+    elif main_option == "pos":
+       layer=None
+       head = None
        for current_arg in arguments:
         if current_arg[0] in ("-n","--name"):
          name = current_arg[1]

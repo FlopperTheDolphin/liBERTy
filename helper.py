@@ -20,6 +20,8 @@ def help(command):
   return "sentence - print the sentence"   
  elif command == 'find':
   return "find [-t | --token] [-n | --name] - underline all token in the sentence"
+ elif command == 'outlier':
+  return "outlier [-l | --larer ] [-h | --head] [-v | --vector] - sort all outliers from a certain matrix" 
    
 def total_help():
  print('* ' + help('load'))
@@ -45,4 +47,6 @@ def total_help():
  print()
  print('* ' + help('sentence'))
  print()
- print('* ' + help('find'))   
+ print('* ' + help('find'))
+ print()
+ print('* ' + help('outlier'))   

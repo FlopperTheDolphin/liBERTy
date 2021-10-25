@@ -5,21 +5,21 @@ from features.utiliy import get_sentence,get_bert_and_spacy_tokens,get_bert_toke
 from fun.comp_att import tokens_to_sentence,select_sub_matrix_for_token,get_head_matrix,get_ordered_token,get_smear,update_token,get_index_from_token
 from fun.view import console_show,view_attention_gradient,view_top_tokens,view_higher_token,view_smear,view_noop,view_matrix,view_total_noop
 
-def see_attention_sentence(name,layer,head,token,out_dir,model_dir,time=None):
+def see_attention_sentence(name,layer,head,word,out_dir,model_dir,time=None):
   from features.utiliy import get_sentence,get_bert_and_spacy_tokens
   sentence = get_sentence(out_dir,name)  
   mtx_dir = create_token_path_file(out_dir,name)
   bert_tokens,spacy_tokens = get_bert_and_spacy_tokens(model_dir,sentence,mtx_dir) 
-  #dic_sent = unify_bert_and_spacy_tokens(spacy_tokens,bert_tokens)
-  #for token in bert_tokens:
-   #if dic_sent[token] == word:
-  frams,j,has = select_sub_matrix_for_token(out_dir,name,layer,head,token) 
-  inds = get_index_from_token(token,j,has,bert_tokens,frams)  
-  for j in range(len(inds)):
-   plot_gradient_attention(mtx_dir,inds[j][0],bert_tokens,token,layer,head,j) 
-   if time != None: 
-    view_top_tokens(inds[j][0],bert_tokens,token,time) 
-   view_higher_token(inds[j][0],bert_tokens,token,time)  
+  dic_sent = unify_bert_and_spacy_tokens(spacy_tokens,bert_tokens)
+  for token in bert_tokens:
+   if dic_sent[token] == word:
+    frams,j,has = select_sub_matrix_for_token(out_dir,name,layer,head,token) 
+    inds = get_index_from_token(token,j,has,bert_tokens,frams)  
+    for j in range(len(inds)):
+     plot_gradient_attention(mtx_dir,inds[j][0],bert_tokens,token,layer,head,j) 
+     if time != None: 
+      view_top_tokens(inds[j][0],bert_tokens,token,time) 
+     view_higher_token(inds[j][0],bert_tokens,token,time)  
 
 
 def create_token_path_file(out_dir,name):

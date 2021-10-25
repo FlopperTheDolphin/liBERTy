@@ -2,8 +2,8 @@ import os
 from fun.vs_constants import *
 from features.utiliy import get_sentence,get_bert_tokens,find
 from fun.loader import load_from_json,save_in_json
-from fun.view import console_show,view_token_div,view_chosen_heads,view_chosen_tokens,view_total_stat,   view_cartesian_div
-from fun.comp_att import get_all_att_sentece,comp_divergence,comp_avg_and_std,update_matrix,get_head_matrix,get_max
+from fun.view import console_show,view_token_div,view_chosen_heads,view_chosen_tokens,view_total_stat, view_cartesian_div,view_outlier,view_total_outlier
+from fun.comp_att import get_all_att_sentece,comp_divergence,comp_avg_and_std,update_matrix,get_head_matrix,get_max,sort_outliers
 
 
 def see_stat(name,out_dir,token,model_dir,vector,id_token):
@@ -61,7 +61,7 @@ def comp_stat(name,out_dir,perc,model_dir,vector='entropy'):
   # purtroppo niente di nuovo, anzi le head hanno mostrato fenomeni di offset singolari in quelle head isolate
 
 def initialise_total_path(out_dir,name,vector):
- return os.path.join(os.path.join(out_dir,name),"total_freq_"+vector+".json")
+ return os.path.join(os.path.join(out_dir,name),"total_freq_"+str(vector)+".json")
  
 def total_stat(name,out_dir,model_dir,vector,view=True):
  sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
@@ -204,7 +204,39 @@ def create_token_path_file(out_dir,name):
  return mtx_dir  
 
 
-def compare():
- return 
- 
+def outlier(name,layer,head,out_dir,model_dir,vector,view=True,sentence=None,bert_tokens=None):
+ if sentence==None or bert_tokens == None:
+  sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
+ total_path = initialise_total_path(out_dir,name,vector)
+ if check_file_exists(total_path) == False:
+  console_show(MSG_EXEC_STAT,vector)
+ else:
+  dic_total = load_from_json(total_path)
+  jsd = dic_total['('+str(layer)+', '+str(head)+')']
+  avg = sum(jsd)/len(jsd)
+  l_diff = list()
+  for i in range(len(jsd)): 
+   diff_token = abs(jsd[i] - avg)
+   l_diff.append(diff_token)
+  df = sort_outliers(l_diff,bert_tokens)
+  if view == True:     
+   view_outlier(df)
+ tokens =''  
+ for i in range(10):  
+  tokens = tokens + ' ' + str(df.iloc[i].name)
+ #print(df.iloc[2].name)   
+ return (tokens,df['att_diff'].iloc[:10].sum()/10)#df.iloc[:5].sum()/5 
 
+#def check_avg_path():
+
+def total_outlier(name,out_dir,model_dir,vector):
+ sentence,bert_tokens = get_sentence_and_bert_tokens(out_dir,name,model_dir)
+ dic_diff = dict()
+ index_list=list()
+ for i in range(1,13,1):
+   for j in range(1,13,1):
+    index = '('+str(i)+', '+str(j)+')'
+    dic_diff[index] = outlier(name,i,j,out_dir,model_dir,vector,False,sentence,bert_tokens)
+    index_list.append(index)
+ view_total_outlier(dic_diff,bert_tokens,index_list)   
+      

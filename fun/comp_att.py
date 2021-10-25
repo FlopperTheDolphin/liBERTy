@@ -47,7 +47,6 @@ def select_sub_matrix_for_token(out_dir,id_sent,layer,head,token):
    frams.append(mtx[token])
    j=j+1
    token = t+'.'+str(j)
-   print('preso ' + token)
   except Exception:
    sel=False
 
@@ -343,3 +342,8 @@ def get_head_matrix():
 
 def get_max(A):
  return np.amax(A)   
+ 
+def sort_outliers(l_diff,bert_tokens):
+ return pd.DataFrame(data=l_diff,index=bert_tokens,columns=['att_diff']).sort_values(by='att_diff',ascending=False)
+  
+  
