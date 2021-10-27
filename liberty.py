@@ -270,7 +270,13 @@ def main():
         elif current_arg[0] in ("-h","--head"):
           head = current_arg[1]    
         else:
-          print("> option not recognized")  
+          print("> option not recognized")
+     if layer == None or head == None or token == None:
+      print(help('smear'))
+      sys.ecit()
+     from features.see_attention import smear
+     smear(name,out_dir,model_dir,token,layer,head) 
+             
     
     
     elif main_option == "find":
