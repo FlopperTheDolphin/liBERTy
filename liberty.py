@@ -17,8 +17,8 @@ def read_config_file():
  parser.read("config.txt")   
  model_dir = parser.get("config", "model_dir") 
  out_dir = parser.get("config", "out_dir")
- sent_dir = parser.get("config", "sent_dir")
- return model_dir, out_dir, sent_dir
+ #sent_dir = parser.get("config", "sent_dir")
+ return model_dir, out_dir#, sent_dir
 
 
 def read_config_att(file_path,n):
@@ -29,7 +29,7 @@ def read_config_att(file_path,n):
 def main():
 	
 ##PARSE 
- model_dir, out_dir, sent_dir = read_config_file() 
+ model_dir, out_dir= read_config_file() 
 
  try:
   name = read_config_att("config.txt","name")

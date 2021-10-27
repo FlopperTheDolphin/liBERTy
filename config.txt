@@ -1,6 +1,4 @@
 [config]
-model_dir = /home/fusco/bt/model_custom
-out_dir = /home/fusco/bt/cd/out
-sent_dir = /home/fusco/dt/rf/2019/training_5000
-
+model_dir = /path_to_model/model_custom
+out_dir = /path_to_out_dir/out
 name = 1
