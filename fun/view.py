@@ -4,6 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from fun.vs_constants import *
 from rich.console import Console
+from features.utiliy import load_from_json
 
 
 def view_top_tokens(fram, tokens, token, time):
