@@ -1,0 +1,8 @@
+[config]
+model_dir = /home/fusco/bt/model_custom/
+out_dir = /home/fusco/bt/cd/out
+name = 1
+ref_dir=/home/fusco/bt/cd/les_nod/foo
+
+
+
