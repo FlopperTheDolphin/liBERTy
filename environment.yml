@@ -108,7 +108,6 @@ dependencies:
     - h5py==3.1.0
     - huggingface-hub==0.0.17
     - idna==3.2
-    - it-core-news-sm==3.1.0
     - jinja2==3.0.1
     - joblib==1.0.1
     - keras==2.6.0
